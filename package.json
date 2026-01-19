@@ -1,5 +1,5 @@
 {
-  "name": "retaaustralia-server",
+  "name": "amana-site",
   "version": "1.0.0",
   "description": "Stripe payment server for weight loss supplement store",
   "main": "server.js",
