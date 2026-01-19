@@ -26,8 +26,8 @@ app.post('/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'https://retaaustralia.netlify.app/success.html', // Replace with your domain
-      cancel_url: 'https://retaaustralia.netlify.app/index.html',   // Replace with your domain
+      success_url: 'https://amanatherapeutics.com/success.html', // Replace with your domain
+      cancel_url: 'https://amanatherapeutics.com/index.html',   // Replace with your domain
       shipping_address_collection: {
         allowed_countries: ['US', 'CA', 'GB', 'AU'], // Add countries you ship to
       },
