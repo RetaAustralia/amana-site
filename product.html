@@ -356,7 +356,38 @@ max-height: 150px;
         .btn { display: inline-block; padding: 1.2rem 2.5rem; border-radius: 50px; font-weight: 800; text-decoration: none; transition: 0.3s; cursor: pointer; border: none; }
         .btn-primary { background: var(--primary); color: white; }
     </style>
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1139823441390332');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1139823441390332&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
 </head>
+
+<script>
+  fbq('track', 'ViewContent');
+
+  fbq('track', 'AddToCart');
+
+  fbq('track', 'InitiateCheckout');
+
+  fbq('track', 'Purchase');
+
+</script>
+
+
 <body>
 
 
@@ -408,12 +439,12 @@ max-height: 150px;
     <section id="buy" class="product-grid">
         <div>
             <div class="img-main">
-                <img id="main-view" src="product1.png">
+                <img id="main-view" src="product1white.png">
                 
             </div>
             <div class="thumb-nav">
-                <img src="product1.png" class="thumb active" onclick="swap(this)">
-                <img src="product2.png" class="thumb" onclick="swap(this)">
+                <img src="product1white.png" class="thumb active" onclick="swap(this)">
+                <img src="product2white.png" class="thumb" onclick="swap(this)">
                 <img src="product3.png" class="thumb" onclick="swap(this)">
             </div>
         </div>
@@ -532,7 +563,7 @@ max-height: 150px;
 </div>
         <div class="faq-item">
             <button class="faq-btn" onclick="toggleFaq(this)">How do Retatrutide pens work? <span>+</span></button>
-            <div class="faq-content"><p style="padding-bottom: 1rem;">The research-grade pens contain 10mg of retatrutide in sterile solution, provided in a <strong>pre-filled</strong> format to keep it sterile for safe laboratory use. Dial the pen 8 clicks per 1mg of retatrutide required for administration.</p></div>
+            <div class="faq-content"><p style="padding-bottom: 1rem;">The research-grade pens contain 10mg of retatrutide in sterile solution, provided in a <strong>pre-filled</strong> format to keep it sterile for safe laboratory use. Dial the pen 32 clicks per 1mg of retatrutide required for administration.</p></div>
         </div>
         <div class="faq-item">
             <button class="faq-btn" onclick="toggleFaq(this)">Do you ship within Australia? <span>+</span></button>
@@ -663,8 +694,8 @@ max-height: 150px;
                 const session = await response.json();
                 await stripe.redirectToCheckout({ sessionId: session.id });
             } catch (err) {
-                document.getElementById('error-message').textContent = 'Connection error.';
-                checkoutBtn.textContent = 'Secure Checkout - $149.00';
+                document.getElementById('error-message').textContent = 'Checkout currently unavailable, please order directly through support@amanatherapeutics.com.';
+                checkoutBtn.textContent = 'Secure Checkout - $249.00';
                 checkoutBtn.disabled = false;
             }
         });
