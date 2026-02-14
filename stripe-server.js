@@ -2,7 +2,7 @@
 // This handles checkout sessions securely
 
 const express = require('express');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); // Replace with your SECRET key (sk_test_...)
+const stripe = require('stripe')('process.env.STRIPE_SECRET_KEY'); // Replace with your SECRET key (sk_test_...)
 const cors = require('cors');
 
 const app = express();
@@ -26,8 +26,8 @@ app.post('/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'https://amanatherapeutics.com/success.html', // Replace with your domain
-      cancel_url: 'https://amanatherapeutics.com/index.html',   // Replace with your domain
+      success_url: 'https://retaaustralia.netlify.app/success.html', // Replace with your domain
+      cancel_url: 'https://retaaustralia.netlify.app/index.html',   // Replace with your domain
       shipping_address_collection: {
         allowed_countries: ['US', 'CA', 'GB', 'AU'], // Add countries you ship to
       },
