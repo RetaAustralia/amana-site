@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Retatrutide Pens</title>
-    <script src="https://js.stripe.com/v3/"></script>
+
 
 <!-- Favicon -->
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -408,48 +408,85 @@ max-height: 150px;
 
 
 
-   
-    <section id="buy" class="product-grid">
-        <div>
-            <div class="img-main">
-                <img id="main-view" src="product1white.png">
-                
-            </div>
-            <div class="thumb-nav">
-                <img src="product1white.png" class="thumb active" onclick="swap(this)">
-                <img src="product2white.png" class="thumb" onclick="swap(this)">
-                <img src="product3.png" class="thumb" onclick="swap(this)">
-            </div>
+  <section id="buy" class="product-grid">
+    <div>
+        <div class="img-main">
+            <img id="main-view" src="vial.png">
         </div>
-        <div>
-            <span style="color: var(--primary); font-weight: 800; font-size: 0.8rem;">BATCH #BN-26RT10-001 NOW AVAILABLE</span>
-            <h2 style="font-size: 2.5rem; margin: 0.5rem 0;">Retatrutide Kit</h2>
-            <div style="font-size: 2.2rem; color: var(--primary); font-weight: 900; margin-bottom: 1.5rem;">$249.00 AUD</div>
-            
-<div class="review-summary">
-    <div class="stars">
-        <span class="star-icon">★</span>
-        <span class="star-icon">★</span>
-        <span class="star-icon">★</span>
-        <span class="star-icon">★</span>
-        <span class="star-icon">★</span>
-    </div>
-    <span class="rating-score">4.9/5.0</span>
-<a href="#track" class="review-count">(131 Verified Reviews)</a>
-</div>
-            
 
-            <div style="margin-bottom: 2rem;">
+        <div class="thumb-nav">
+            <img src="vial.png" class="thumb active" onclick="swap(this)">
+            <img src="product1white.png" class="thumb" onclick="swap(this)">
+            <img src="product2white.png" class="thumb" onclick="swap(this)">
+            <img src="product3.png" class="thumb" onclick="swap(this)">
+        </div>
+    </div>
+
+    <div>
+        <span style="color: var(--primary); font-weight: 800; font-size: 0.8rem;">BATCH #BN-26RT10-001 NOW AVAILABLE</span>
+        <h2 style="font-size: 2.5rem; margin: 0.5rem 0;">Retatrutide Kit</h2>
+
+        <div id="price-display" style="font-size: 2.2rem; color: var(--primary); font-weight: 900; margin-bottom: 1.5rem;">
+            $89.95 AUD
+        </div>
+
+        <div class="review-summary">
+            <div class="stars">
+                <span class="star-icon">★</span>
+                <span class="star-icon">★</span>
+                <span class="star-icon">★</span>
+                <span class="star-icon">★</span>
+                <span class="star-icon">★</span>
+            </div>
+            <span class="rating-score">4.9/5.0</span>
+            <a href="#track" class="review-count">(131 Verified Reviews)</a>
+        </div>
+
+        <div class="purchase-row" style="display:flex; align-items:flex-end; gap:20px; margin-bottom:2rem; flex-wrap:wrap;">
+
+            <div class="qty-box">
                 <label style="font-weight: bold; display: block; margin-bottom: 8px;">Quantity:</label>
                 <input type="number" id="quantity" value="1" min="1" style="width: 80px; padding: 12px; border: 2px solid #ddd; border-radius: 10px;">
             </div>
 
+            <div class="option-box">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">Version:</label>
+                <select id="purchase-option" onchange="changeOption()"
+                        style="padding: 12px; border-radius: 10px; border: 2px solid #ddd; min-width: 180px;">
+
+                    <!-- DEFAULT OPTION -->
+                    <option 
+                        value="vial"
+                        data-image="vial.png"
+                        data-price="89.95"
+                        data-url="https://square.link/u/CxXPXAGy"
+                        selected
+                    >
+                        10mg Vial
+                    </option>
+
+                    <option 
+                        value="kit"
+                        data-image="product1white.png"
+                        data-price="249.00"
+                        data-url="https://square.link/u/xcNUSsiM?src=embed"
+                    >
+                        Retatrutide Kit
+                    </option>
+
+                </select>
+            </div>
+
+        </div>
+
 <div class="payment-outer-container">
-  <a target="_blank" 
+<a target="_blank" 
+     id="checkout-button"
      href="https://square.link/u/xcNUSsiM?src=embed" 
      class="btn btn-primary custom-square-width">
      Secure Checkout
-  </a>
+</a>
+
 </div>
 
 <style>
@@ -666,6 +703,41 @@ max-height: 150px;
 </footer>
 
     <script>
+
+function swap(img) {
+    document.getElementById("main-view").src = img.src;
+
+    // update active class
+    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+    img.classList.add('active');
+}
+
+function changeOption() {
+    const selector = document.getElementById("purchase-option");
+    const option = selector.options[selector.selectedIndex];
+
+    const newImage = option.dataset.image;
+    const newPrice = option.dataset.price;
+    const newURL   = option.dataset.url;
+
+    // Change main image
+    if (newImage) {
+        document.getElementById("main-view").src = newImage;
+        document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+    }
+
+    // Update price
+    if (newPrice) {
+        document.getElementById("price-display").textContent = `$${newPrice} AUD`;
+    }
+
+    // Update checkout link
+    if (newURL) {
+        document.getElementById("checkout-button").href = newURL;
+    }
+}
+
+
         // 1. Image Gallery logic
         function swap(el) {
             document.getElementById('main-view').src = el.src;
