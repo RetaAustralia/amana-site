@@ -356,24 +356,6 @@ max-height: 150px;
         .btn { display: inline-block; padding: 1.2rem 2.5rem; border-radius: 50px; font-weight: 800; text-decoration: none; transition: 0.3s; cursor: pointer; border: none; }
         .btn-primary { background: var(--primary); color: white; }
     </style>
-<!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '900134352865829');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=900134352865829&ev=PageView&noscript=1"
-/></noscript>
-
-<!-- End Meta Pixel Code -->
 </head>
 
 
@@ -463,12 +445,12 @@ src="https://www.facebook.com/tr?id=900134352865829&ev=PageView&noscript=1"
 
             <div class="qty-box">
                 <label style="font-weight: bold; display: block; margin-bottom: 8px;">Quantity:</label>
-                <input type="number" id="quantity" value="1" min="1" style="width: 80px; padding: 12px; border: 2px solid #ddd; border-radius: 10px;">
+<input type="number" id="quantity" value="1" min="1" onchange="updateSelection()" style="width: 80px; padding: 12px; border: 2px solid #ddd; border-radius: 10px;">
             </div>
 
             <div class="option-box">
                 <label style="font-weight: bold; display: block; margin-bottom: 8px;">Version:</label>
-                <select id="purchase-option" onchange="changeOption()"
+                <select id="productSelect" onchange="updateSelection()"
                         style="padding: 12px; border-radius: 10px; border: 2px solid #ddd; min-width: 180px;">
 
                     <!-- DEFAULT OPTION -->
@@ -476,7 +458,7 @@ src="https://www.facebook.com/tr?id=900134352865829&ev=PageView&noscript=1"
                         value="vial"
                         data-image="vial.png"
                         data-price="89.95"
-                        data-url="https://square.link/u/CxXPXAGy"
+                  
                         selected
                     >
                         10mg Vial
@@ -486,7 +468,6 @@ src="https://www.facebook.com/tr?id=900134352865829&ev=PageView&noscript=1"
                         value="kit"
                         data-image="product1white.png"
                         data-price="249.00"
-                        data-url="https://square.link/u/xcNUSsiM?src=embed"
                     >
                         10mg Pen 
                     </option>
@@ -529,14 +510,13 @@ src="https://www.facebook.com/tr?id=900134352865829&ev=PageView&noscript=1"
 
 <p>⚠️<strong>Shipping Update:</strong> Shipping may take longer than usual due to high order volume. We appreciate your understanding and patience.</p>
 <div class="payment-outer-container">
-<a target="_blank" 
-     id="checkout-button"
-     href="https://square.link/u/CxXPXAGy" 
-     class="btn btn-primary custom-square-width"
-     onclick="fbq('track','AddToCart');">
-     Secure Checkout
-</a>
-
+<button 
+    id="checkout-button" 
+    type="button"
+    class="btn btn-primary custom-square-width" 
+    onclick="goToCheckout();">
+    Secure Checkout
+</button>
 </div>
 
 <style>
@@ -736,141 +716,66 @@ src="https://www.facebook.com/tr?id=900134352865829&ev=PageView&noscript=1"
     </div>
 </footer>
 
-    <script>
+<script>
+function updateSelection() {
+    const select = document.getElementById("productSelect");
+    const option = select.options[select.selectedIndex];
+    const qtyInput = document.getElementById("quantity");
+    
+    const price = parseFloat(option.dataset.price);
+    const image = option.dataset.image;
+    const quantity = parseInt(qtyInput.value) || 1;
 
-function swap(img) {
-    document.getElementById("main-view").src = img.src;
+    // Calculate Total (matches your discount table)
+    let total = price * quantity;
+    if (option.value === "vial") {
+        if (quantity === 2) total = 169.95;
+        else if (quantity === 3) total = 249.95;
+        else if (quantity === 4) total = 319.95;
+        else if (quantity >= 5) total = 349.95;
+    }
 
-    // update active class
+    document.getElementById("price-display").textContent = `$${total.toFixed(2)} AUD`;
+    if (image) { document.getElementById("main-view").src = image; }
+}
+
+function goToCheckout() {
+    const select = document.getElementById("productSelect");
+    const option = select.options[select.selectedIndex];
+    const quantity = parseInt(document.getElementById("quantity").value) || 1;
+    
+    // Calculate the same total for the checkout page
+    const price = parseFloat(option.dataset.price);
+    let total = price * quantity;
+    if (option.value === "vial") {
+        if (quantity === 2) total = 169.95;
+        else if (quantity === 3) total = 249.95;
+        else if (quantity === 4) total = 319.95;
+        else if (quantity >= 5) total = 349.95;
+    }
+
+    // SAVE TO MEMORY
+    localStorage.setItem("product", `${quantity}x ${option.text.trim()}`);
+    localStorage.setItem("price", total.toFixed(2));
+
+    // MOVE TO CHECKOUT
+    window.location.href = "checkout.html";
+}
+
+// Gallery & UI Logic
+function swap(el) {
+    document.getElementById('main-view').src = el.src;
     document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-    img.classList.add('active');
+    el.classList.add('active');
 }
 
-function changeOption() {
-    const selector = document.getElementById("purchase-option");
-    const option = selector.options[selector.selectedIndex];
-
-    const newImage = option.dataset.image;
-    const newPrice = option.dataset.price;
-    const newURL   = option.dataset.url;
-
-    // Change main image
-    if (newImage) {
-        document.getElementById("main-view").src = newImage;
-        document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-    }
-
-    // Update price
-    if (newPrice) {
-        document.getElementById("price-display").textContent = `$${newPrice} AUD`;
-    }
-
-    // Update checkout link
-    if (newURL) {
-        document.getElementById("checkout-button").href = newURL;
-    }
+function toggleFaq(btn) {
+    const panel = btn.nextElementSibling;
+    panel.style.maxHeight = panel.style.maxHeight ? null : panel.scrollHeight + "px";
 }
 
-
-        // 1. Image Gallery logic
-        function swap(el) {
-            document.getElementById('main-view').src = el.src;
-            document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-        }
-
-        // 2. FAQ Accordion logic
-        function toggleFaq(btn) {
-            const panel = btn.nextElementSibling;
-            const span = btn.querySelector('span');
-            if (panel.style.maxHeight) {
-                panel.style.maxHeight = null;
-                span.textContent = '+';
-            } else {
-                panel.style.maxHeight = panel.scrollHeight + "px";
-                span.textContent = '-';
-            }
-        }
-
-        // 3. Carousel logic
-        let slideIndex = 0;
-        function moveSlide(dir) {
-            const track = document.getElementById('track');
-            const total = document.querySelectorAll('.slide').length;
-            slideIndex = (slideIndex + dir + total) % total;
-            track.style.transform = `translateX(-${slideIndex * 100}%)`;
-        }
-
-        // 4. Stripe logic
-        const stripe = Stripe('pk_live_NLoK4RM87ML1Vrq45ml1Iaaa00q6sT0O8M');
-        const priceId = 'price_1SrAhDESD6j98NV5HyLkzRaW';
-        const serverUrl = 'https://api.amanatherapeutics.com';
-        
-        const checkoutBtn = document.getElementById('checkout-button');
-        checkoutBtn.addEventListener('click', async () => {
-            const qty = document.getElementById('quantity').value;
-            try {
-                checkoutBtn.textContent = 'Processing...';
-                checkoutBtn.disabled = true;
-                const response = await fetch(`${serverUrl}/create-checkout-session`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ priceId: priceId, quantity: parseInt(qty) })
-                });
-                const session = await response.json();
-                await stripe.redirectToCheckout({ sessionId: session.id });
-            } catch (err) {
-                document.getElementById('error-message').textContent = 'Checkout currently unavailable, please order directly through support@amanatherapeutics.com.';
-                checkoutBtn.textContent = 'Secure Checkout - $249.00';
-                checkoutBtn.disabled = false;
-            }
-        });
-function toggleMenu(e) {
-    if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    
-    const menu = document.getElementById('navLinks');
-    const body = document.body;
-    
-    menu.classList.toggle('active');
-    body.classList.toggle('menu-open');
-    
-    const spans = document.querySelectorAll('.mobile-menu-btn span');
-    if (menu.classList.contains('active')) {
-        spans[0].style.transform = "rotate(45deg) translate(5px, 5px)";
-        spans[1].style.opacity = "0";
-        spans[2].style.transform = "rotate(-45deg) translate(5px, -5px)";
-    } else {
-        spans[0].style.transform = "none";
-        spans[1].style.opacity = "1";
-        spans[2].style.transform = "none";
-    }
-    return false;
-}
-
-// Close menu when clicking outside
-document.addEventListener('click', function(e) {
-    const menu = document.getElementById('navLinks');
-    const btn = document.querySelector('.mobile-menu-btn');
-    
-    if (menu.classList.contains('active') && 
-        !menu.contains(e.target) && 
-        !btn.contains(e.target)) {
-        toggleMenu();
-    }
-});
-
-// Close menu when clicking a link
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', function() {
-        if (window.innerWidth <= 968) {
-            toggleMenu();
-        }
-    });
-});
-    </script>
+window.onload = updateSelection;
+</script>
 <div style="background-color: #f8d7da; color: #721c24; padding: 15px; text-align: center; font-weight: bold; border: 1px solid #f5c6cb; margin-top: 20px;">
     IMPORTANT: All products on this site are for laboratory research use only. NOT FOR HUMAN CONSUMPTION.
 </div>
