@@ -141,7 +141,7 @@ input {
     <form action="https://formspree.io/f/mojkyvkb" method="POST" id="checkout-form">
         
         <input type="hidden" name="Order_ID" id="hidden-order-id">
-        <input type="hidden" name="Product_Details" id="hidden-product">
+        <input type="hidden" name="Product" id="hidden-product">
         <input type="hidden" name="Total_Price" id="hidden-total">
 
         <h3>Shipping Details</h3>
@@ -158,20 +158,21 @@ input {
 
         <div class="form-group">
             <label>Address</label>
-            <input type="text" name="Address" id="address" required>
+            <input type="text" name="Shipping_Address" id="address" required>
         </div>
 
-        <div class="form-group">
-            <label>City</label>
-            <input type="text" name="City" id="city" required>
+        <div class="form-group" style="display: flex; gap: 10px;">
+            <div style="flex: 2;">
+                <label>City</label>
+                <input type="text" name="City" id="city" required>
+            </div>
+            <div style="flex: 1;">
+                <label>Postcode</label>
+                <input type="text" name="Postcode" id="postcode" required>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label>Postcode</label>
-            <input type="text" name="Postcode" id="postcode" required>
-        </div>
-
-        <button type="button" class="btn" onclick="showPayment()">Continue to Payment</button>
+        <button type="button" class="btn" style="margin-top: 20px;" onclick="showPayment()">Continue to Payment</button>
 
         <div id="payment-section" style="display:none;" class="payment-box">
             <h3>Pay via PayID (Instant)</h3>
@@ -184,30 +185,50 @@ input {
 
             <p><strong>Reference:</strong> <span id="payment-ref"></span></p>
 
-            <p style="margin-top:15px;">After payment, click below to notify us:</p>
+            <p style="margin-top:15px; color: #856404; font-size: 0.9rem;">
+                <em>Once you have completed the transfer, click the button below to send us your order details.</em>
+            </p>
 
-            <button type="submit" class="btn">I’ve Paid</button>
+            <button type="submit" class="btn" style="background: #28a745;">I’ve Paid - Submit Order</button>
         </div>
     </form>
 </div>
 
 <script>
-    // Ensure these lines are added to your existing script logic
-    const orderIdValue = "AMN-" + Math.floor(Math.random() * 1000000);
-    const productValue = localStorage.getItem("product") || "No item selected";
-    const priceValue = localStorage.getItem("price") || "0.00";
+// 1. Setup Order Info
+const orderId = "AMN-" + Math.floor(Math.random() * 1000000);
+const product = localStorage.getItem("product") || "No item selected";
+const price = localStorage.getItem("price") || "0.00";
 
-    // This fills the hidden inputs so they get sent in the email
-    document.getElementById("hidden-order-id").value = orderIdValue;
-    document.getElementById("hidden-product").value = productValue;
-    document.getElementById("hidden-total").value = priceValue;
-    
-    // UI Updates
-    document.getElementById("order-id").textContent = orderIdValue;
-    document.getElementById("payment-ref").textContent = orderIdValue;
-    document.getElementById("product-name").textContent = productValue;
-    document.getElementById("product-total").textContent = "$" + priceValue;
-    document.getElementById("final-total").textContent = "$" + priceValue + " AUD";
+// 2. Update UI
+document.getElementById("order-id").textContent = orderId;
+document.getElementById("payment-ref").textContent = orderId;
+document.getElementById("product-name").textContent = product;
+document.getElementById("product-total").textContent = "$" + price;
+document.getElementById("final-total").textContent = "$" + price + " AUD";
+
+// 3. Fill Hidden Fields for Formspree
+document.getElementById("hidden-order-id").value = orderId;
+document.getElementById("hidden-product").value = product;
+document.getElementById("hidden-total").value = price;
+
+// 4. Show Payment Function
+function showPayment() {
+    const nameInput = document.getElementById("name").value;
+    if(!nameInput) {
+        alert("Please enter your name first.");
+        return;
+    }
+    document.getElementById("payment-section").style.display = "block";
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+
+// 5. Cleanup on Submit
+document.getElementById("checkout-form").onsubmit = function() {
+    // Optional: Clear storage so they don't see old items next time
+    localStorage.removeItem("product");
+    localStorage.removeItem("price");
+};
 </script>
 
 </body>
