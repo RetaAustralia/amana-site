@@ -122,142 +122,92 @@ input {
 
 <div class="checkout-container">
 
-<h2>Checkout</h2>
+    <h2>Checkout</h2>
 
-<!-- ORDER SUMMARY -->
-<div class="order-box">
-    <h3>Your Order</h3>
-
-    <div class="order-line">
-        <span id="product-name">Retatrutide</span>
-        <span id="product-total">$89.95</span>
+    <div class="order-box">
+        <h3>Your Order</h3>
+        <div class="order-line">
+            <span id="product-name">Loading...</span>
+            <span id="product-total">$0.00</span>
+        </div>
+        <div class="order-line">
+            <strong>Total</strong>
+            <strong id="final-total">$0.00 AUD</strong>
+        </div>
     </div>
 
-    <div class="order-line">
-        <strong>Total</strong>
-        <strong id="final-total">$89.95 AUD</strong>
-    </div>
-</div>
+    <p><strong>Order ID:</strong> <span id="order-id"></span></p>
 
-<!-- ORDER ID -->
-<p><strong>Order ID:</strong> <span id="order-id"></span></p>
+    <form action="https://formspree.io/f/mojkyvkb" method="POST" id="checkout-form">
+        
+        <input type="hidden" name="Order_ID" id="hidden-order-id">
+        <input type="hidden" name="Product_Details" id="hidden-product">
+        <input type="hidden" name="Total_Price" id="hidden-total">
 
-<!-- CUSTOMER INFO -->
-<h3>Shipping Details</h3>
+        <h3>Shipping Details</h3>
 
-<div class="form-group">
-<label>Full Name</label>
-<input type="text" id="name" required>
-</div>
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="Customer_Name" id="name" required>
+        </div>
 
-<div class="form-group">
-<label>Email</label>
-<input type="email" id="email" required>
-</div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="Customer_Email" id="email" required>
+        </div>
 
-<div class="form-group">
-<label>Address</label>
-<input type="text" id="address" required>
-</div>
+        <div class="form-group">
+            <label>Address</label>
+            <input type="text" name="Address" id="address" required>
+        </div>
 
-<div class="form-group">
-<label>City</label>
-<input type="text" id="city" required>
-</div>
+        <div class="form-group">
+            <label>City</label>
+            <input type="text" name="City" id="city" required>
+        </div>
 
-<div class="form-group">
-<label>Postcode</label>
-<input type="text" id="postcode" required>
-</div>
+        <div class="form-group">
+            <label>Postcode</label>
+            <input type="text" name="Postcode" id="postcode" required>
+        </div>
 
-<button class="btn" onclick="showPayment()">Continue to Payment</button>
+        <button type="button" class="btn" onclick="showPayment()">Continue to Payment</button>
 
-<!-- PAYMENT -->
-<div id="payment-section" style="display:none;" class="payment-box">
+        <div id="payment-section" style="display:none;" class="payment-box">
+            <h3>Pay via PayID (Instant)</h3>
+            <p>Email: <strong>your@email.com</strong></p>
+            <p>Name: <strong>AMANA Therapeutics</strong></p>
 
-<h3>Pay via PayID (Instant)</h3>
-<p>Email: <strong>your@email.com</strong></p>
-<p>Name: <strong>AMANA Therapeutics</strong></p>
+            <h3>Bank Transfer</h3>
+            <p>BSB: <strong>123-456</strong></p>
+            <p>Account Number: <strong>12345678</strong></p>
 
-<h3>Bank Transfer</h3>
-<p>BSB: <strong>123-456</strong></p>
-<p>Account Number: <strong>12345678</strong></p>
+            <p><strong>Reference:</strong> <span id="payment-ref"></span></p>
 
-<p><strong>Reference:</strong> <span id="payment-ref"></span></p>
+            <p style="margin-top:15px;">After payment, click below to notify us:</p>
 
-<p style="margin-top:15px;">After payment, click below:</p>
-
-<button class="btn" onclick="confirmOrder()">I’ve Paid</button>
-
-</div>
-
+            <button type="submit" class="btn">I’ve Paid</button>
+        </div>
+    </form>
 </div>
 
 <script>
+    // Ensure these lines are added to your existing script logic
+    const orderIdValue = "AMN-" + Math.floor(Math.random() * 1000000);
+    const productValue = localStorage.getItem("product") || "No item selected";
+    const priceValue = localStorage.getItem("price") || "0.00";
 
-// 1. Generate Order ID immediately when the page loads
-const orderId = "AMN-" + Math.floor(Math.random() * 1000000);
-document.getElementById("order-id").textContent = orderId;
-document.getElementById("payment-ref").textContent = orderId;
-
-// 2. RETRIEVE DATA
-// We pull what was saved in product.html
-const product = localStorage.getItem("product") || "No item selected";
-const price = localStorage.getItem("price") || "0.00";
-
-// 3. UPDATE THE SCREEN
-document.getElementById("product-name").textContent = product;
-document.getElementById("product-total").textContent = "$" + price;
-document.getElementById("final-total").textContent = "$" + price + " AUD";
-
-// 4. SHOW PAYMENT SECTION
-function showPayment() {
-    const name = document.getElementById("name").value;
-    if(!name) {
-        alert("Please enter your name first");
-        return;
-    }
-    document.getElementById("payment-section").style.display = "block";
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-}
-
-// 5. PROCESS FINAL ORDER
-function confirmOrder() {
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-
-    if (!name || !email) {
-        alert("Please ensure your name and email are filled out.");
-        return;
-    }
-
-    // Create the order object
-    const order = {
-        id: orderId,
-        name: name,
-        email: email,
-        address: document.getElementById("address").value,
-        city: document.getElementById("city").value,
-        postcode: document.getElementById("postcode").value,
-        product: product,
-        price: price,
-        time: new Date().toLocaleString()
-    };
-
-    // Save to the "Orders" master list
-    let orders = JSON.parse(localStorage.getItem("orders")) || [];
-    orders.push(order);
-    localStorage.setItem("orders", JSON.stringify(orders));
-
-    alert("Order received! We will verify your payment and process your order shortly.");
+    // This fills the hidden inputs so they get sent in the email
+    document.getElementById("hidden-order-id").value = orderIdValue;
+    document.getElementById("hidden-product").value = productValue;
+    document.getElementById("hidden-total").value = priceValue;
     
-    // Clear the cart so they don't buy the same thing twice by accident
-    localStorage.removeItem("product");
-    localStorage.removeItem("price");
-
-    // Redirect to home
-    window.location.href = "index.html"; 
-}
+    // UI Updates
+    document.getElementById("order-id").textContent = orderIdValue;
+    document.getElementById("payment-ref").textContent = orderIdValue;
+    document.getElementById("product-name").textContent = productValue;
+    document.getElementById("product-total").textContent = "$" + priceValue;
+    document.getElementById("final-total").textContent = "$" + priceValue + " AUD";
 </script>
 
 </body>
