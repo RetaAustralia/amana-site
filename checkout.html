@@ -6,6 +6,25 @@
 <title>Checkout - AMANA Therapeutics</title>
 
 <style>
+
+.announcement-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: #fcf8e3;
+    padding: 10px 5px;
+    text-align: center;
+}
+
+nav {
+    position: fixed;
+    top: 40px; /* height of announcement bar */
+    left: 0;
+    width: 100%;
+    z-index: 999;
+}
 :root { --primary: #1e5a9e; --dark: #1a1a1a; --light: #f8fafc; }
 
 body {
@@ -110,6 +129,9 @@ input {
     margin-top: 2rem;
     border: 2px solid #ffeeba;
 }
+body {
+    padding-top: 120px;
+}
 
 </style>
 </head>
@@ -139,7 +161,23 @@ input {
             <strong id="final-total">$0.00 AUD</strong>
         </div>
     </div>
-
+<div style="
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    background-color: #fcf8e3; 
+    color: #8a6d3b; 
+    text-align: center; 
+    padding: 10px 5px; 
+    font-size: 13px; 
+    font-weight: bold; 
+    border-bottom: 2px solid #faebcc; 
+    z-index: 9999;
+    font-family: sans-serif;
+">
+   Due to undergoing rebranding orders are temporarily subject to delay. Thank you for your understanding.
+</div>
     <p><strong>Order ID:</strong> <span id="order-id"></span></p>
 
     <form action="https://formspree.io/f/mojkyvkb" method="POST" id="checkout-form">
