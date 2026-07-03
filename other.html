@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Other Peptides</title>
+
+<!-- Favicon -->
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="shortcut icon" href="favicon.ico">
+
+    <style>
+        :root { --primary: #1e5a9e; --dark: #1a1a1a; --accent: #ffd700; --success: #2e7d32; --light: #f8fafc; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; overflow-x: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; scroll-behavior: smooth; }
+
+        /* Navigation (matches other pages) */
+        nav {
+            background: white;
+            padding: 0rem 5%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            position: -webkit-sticky;
+            width: 100%;
+            height: 80px;
+            top: 0;
+            z-index: 9999;
+            display: block;
+        }
+        .nav-container { height: 80px; max-width: 1250px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; position: relative; }
+
+        .logo { display: flex; align-items: center; text-decoration: none; }
+        .logo img {
+            height: 100%;
+            max-height: 80px;
+            width: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        .logo:hover img { transform: scale(1.02); }
+
+        .nav-links { display: flex; list-style: none; margin: 0; padding: 0; }
+        .nav-links li { display: flex; align-items: center; }
+        .nav-links a { text-decoration: none; color: #333; font-weight: 700; padding: 0 1.5rem; height: 80px; display: flex; align-items: center; }
+        @media (max-width: 968px) { .nav-links { display: none; } }
+
+        /* Hamburger Button */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: transparent;
+            cursor: pointer !important;
+            z-index: 10000;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .mobile-menu-btn span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: #1e5a9e;
+            border-radius: 3px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 968px) {
+            .mobile-menu-btn { display: flex !important; }
+
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 80%;
+                height: 100vh;
+                background: white !important;
+                flex-direction: column;
+                padding: 100px 0 20px 0;
+                box-shadow: -5px 0 20px rgba(0,0,0,0.2);
+                z-index: 2000 !important;
+                overflow-y: auto;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+            .nav-links.active { display: flex !important; transform: translateX(0); }
+            .nav-links li { width: 100%; border-bottom: 1px solid #f0f0f0; }
+            .nav-links a { width: 100%; padding: 1.2rem 2rem; height: auto; font-size: 1.1rem; justify-content: flex-start; }
+            .nav-links a:hover { background: #f8f8f8; }
+
+            body.menu-open::before {
+                content: '';
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 1999;
+            }
+        }
+
+        /* SHOP */
+        .shop-header { text-align: center; padding: 3rem 1.5rem 1rem; max-width: 700px; margin: 0 auto; }
+        .shop-header h1 { font-size: 2.2rem; margin-bottom: 0.75rem; color: var(--dark); }
+        .shop-header p { color: #666; font-size: 1rem; }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 1rem;
+        }
+        @media (max-width: 900px) { .shop-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 560px) { .shop-grid { grid-template-columns: 1fr; } }
+
+        .product-card {
+            position: relative;
+            border: 2px solid #eee;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: 0.2s ease;
+        }
+        .product-card.selected { border-color: var(--primary); box-shadow: 0 8px 25px rgba(30,90,158,0.15); }
+        .product-card.out-of-stock { opacity: 0.55; }
+
+        /* Stock status pill (same visual language as the "LIVE NOW" badge) */
+        .stock-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            border-radius: 6px; padding: 5px 10px; margin-bottom: 1rem;
+        }
+        .stock-dot { width: 6px; height: 6px; border-radius: 999px; }
+        .stock-badge span.label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; }
+
+        .stock-badge.in { border: 1px solid rgba(34,197,94,0.3); background: rgba(34,197,94,0.1); }
+        .stock-badge.in .stock-dot { background: #22c55e; }
+        .stock-badge.in .label { color: #15803d; }
+
+        .stock-badge.low { border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.1); }
+        .stock-badge.low .stock-dot { background: #f59e0b; }
+        .stock-badge.low .label { color: #b45309; }
+
+        .stock-badge.out { border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.1); }
+        .stock-badge.out .stock-dot { background: #ef4444; }
+        .stock-badge.out .label { color: #b91c1c; }
+
+        .product-card h3 { font-size: 1.05rem; margin-bottom: 0.6rem; }
+        .product-card .price { font-size: 1.4rem; font-weight: 900; color: var(--primary); margin-bottom: 1rem; }
+
+        .card-controls { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .select-row { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+        .select-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+        .qty-select { padding: 8px 10px; border-radius: 8px; border: 2px solid #ddd; font-size: 0.9rem; }
+        .qty-select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .order-panel {
+            max-width: 480px;
+            margin: 2.5rem auto 4rem;
+            padding: 2.5rem 2rem;
+            background: var(--light);
+            border-radius: 20px;
+            text-align: center;
+        }
+        .order-summary { text-align: left; font-size: 0.9rem; color: #444; margin-bottom: 1rem; }
+        .order-summary div { display: flex; justify-content: space-between; padding: 4px 0; }
+        .order-summary .empty { color: #999; text-align: center; font-style: italic; }
+
+        .order-total { font-size: 2rem; font-weight: 900; color: var(--primary); margin: 1rem 0 1.5rem; }
+
+        .btn { display: inline-block; padding: 1.2rem 2.5rem; border-radius: 50px; font-weight: 800; text-decoration: none; transition: 0.3s; cursor: pointer; border: none; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; max-width: 300px; }
+        #error-message { color: red; margin-top: 1rem; min-height: 1.2rem; }
+
+        /* Request section */
+        .request-section {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 4rem;
+            padding: 3rem 1.5rem;
+            background: var(--light);
+            border-radius: 20px;
+        }
+        .request-section h2 { font-size: 1.8rem; margin-bottom: 0.75rem; color: var(--dark); }
+        .request-section p { color: #666; margin-bottom: 1.75rem; }
+        .btn-outline-request {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-outline-request:hover { background: var(--primary); color: white; }
+
+        /* Footer (matches other pages) */
+        .site-footer { background: #1a1a1a; color: white; padding: 4rem 5% 2rem; margin-top: 4rem; }
+        .footer-container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem; margin-bottom: 3rem; }
+        .footer-section h4 { margin-bottom: 1.5rem; color: var(--primary); font-size: 1.1rem; letter-spacing: 1px; }
+        .footer-section ul { list-style: none; padding: 0; }
+        .footer-section ul li { margin-bottom: 0.8rem; }
+        .footer-section a { color: #ccc; text-decoration: none; transition: 0.3s; font-size: 0.95rem; }
+        .footer-section a:hover { color: white; }
+        .footer-bottom { text-align: center; padding-top: 2rem; border-top: 1px solid #333; color: #888; font-size: 0.9rem; max-width: 1100px; margin: 0 auto; }
+        @media (max-width: 768px) {
+            .footer-container { grid-template-columns: 1fr; text-align: center; gap: 2.5rem; }
+            .footer-section h4 { margin-bottom: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div style="height: 45px;"></div>
+
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo"><img src="logo.png" alt="AMANA Therapeutics Logo"></a>
+
+        <button type="button" class="mobile-menu-btn" onclick="toggleMenu(event)" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="product.html">Retatrutide</a></li>
+            <li><a href="other.html">Other Peptides</a></li>
+            <li><a href="faq.html">FAQs</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fcf8e3;
+    color: #8a6d3b;
+    text-align: center;
+    padding: 10px 5px;
+    font-size: 13px;
+    font-weight: bold;
+    border-bottom: 2px solid #faebcc;
+    z-index: 9999;
+    font-family: sans-serif;
+">
+   🚀📦 FREE SHIPPING & BAC WATER ON ALL ORDERS
+</div>
+
+<div class="shop-header">
+    <h1>Shop Other Peptides</h1>
+    <p>We periodically stock other peptides per customer requests. If you'd like to request a re-stock or other peptide, fill in our contact form to let us know and we will get you sorted ASAP.</p>
+</div>
+
+<div class="shop-grid" id="shopGrid"></div>
+
+<div class="order-panel">
+    <div class="order-summary" id="orderSummary">
+        <div class="empty">No items selected yet</div>
+    </div>
+
+    <div class="order-total" id="orderTotal">$0.00 AUD</div>
+
+    <button type="button" id="checkout-button" class="btn btn-primary" onclick="goToCheckout()">Secure Checkout</button>
+    <div id="error-message"></div>
+</div>
+
+<section class="request-section">
+    <h2>Don't See What You're Looking For?</h2>
+    <p>Let us know what you're looking for and we can usually sort you out within a couple weeks.</p>
+    <a href="contact.html" class="btn btn-outline-request">Request</a>
+</section>
+
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>Product</h4>
+            <ul>
+                <li><a href="product.html">Retatrutide</a></li>
+                <li><a href="other.html">Other Peptides</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Support</h4>
+            <ul>
+                <li><a href="contact.html">Contact Us</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="faq.html">FAQs</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Legal</h4>
+            <ul>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms of Service</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 AMANA Therapeutics. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+/* =========================================================
+   EDIT YOUR PRODUCTS, PRICES + STOCK STATUS HERE.
+   stock accepts exactly one of: "in", "low", "out"
+     "in"  -> green "In Stock"
+     "low" -> yellow "Low Stock"
+     "out" -> red "Out of Stock" (card is disabled, can't be selected)
+   ========================================================= */
+const PRODUCTS = [
+    { id: "p1", name: "GHK-CU 50mg",           price: 49.95, stock: "in"  },
+    { id: "p2", name: "BPC-157 10mg",                price: 59.95, stock: "in"  },
+    { id: "p3", name: "TB-500 10mg",                 price: 79.95, stock: "in" },
+    { id: "p4", name: "Semax 10mg", price: 49.95, stock: "in"  },
+    { id: "p5", name: "Selank 10mg",             price: 49.95, stock: "in"  },
+    { id: "p6", name: "NAD+ 500mg",            price: 69.95, stock: "in" },
+    { id: "p7", name: "Glutathione 600mg",            price: 49.95, stock: "low" }
+];
+/* ========================================================= */
+
+const STOCK_LABELS = { in: "In Stock", low: "Low Stock", out: "Out of Stock" };
+
+// cart is a map of productId -> quantity, only for checked items
+const cart = {};
+
+function renderProducts() {
+    const grid = document.getElementById('shopGrid');
+    grid.innerHTML = PRODUCTS.map(p => {
+        const disabled = p.stock === "out";
+        return `
+        <div class="product-card${disabled ? ' out-of-stock' : ''}" id="card-${p.id}">
+            <div class="stock-badge ${p.stock}">
+                <span class="stock-dot"></span>
+                <span class="label">${STOCK_LABELS[p.stock]}</span>
+            </div>
+            <h3>${p.name}</h3>
+            <div class="price">$${p.price.toFixed(2)} AUD</div>
+            <div class="card-controls">
+                <label class="select-row">
+                    <input type="checkbox" id="check-${p.id}" ${disabled ? 'disabled' : ''} onchange="toggleProduct('${p.id}')">
+                    Add
+                </label>
+                <select class="qty-select" id="qty-${p.id}" disabled onchange="setQty('${p.id}', this.value)">
+                    <option value="1">Qty: 1</option>
+                    <option value="2">Qty: 2</option>
+                    <option value="3">Qty: 3</option>
+                    <option value="4">Qty: 4</option>
+                    <option value="5">Qty: 5</option>
+                </select>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function toggleProduct(id) {
+    const product = PRODUCTS.find(p => p.id === id);
+    if (!product || product.stock === "out") return;
+
+    const checkbox = document.getElementById(`check-${id}`);
+    const qtySelect = document.getElementById(`qty-${id}`);
+    const card = document.getElementById(`card-${id}`);
+
+    if (checkbox.checked) {
+        cart[id] = parseInt(qtySelect.value) || 1;
+        qtySelect.disabled = false;
+        card.classList.add('selected');
+    } else {
+        delete cart[id];
+        qtySelect.disabled = true;
+        card.classList.remove('selected');
+    }
+
+    document.getElementById('error-message').textContent = '';
+    updateOrder();
+}
+
+function setQty(id, value) {
+    if (!(id in cart)) return;
+    cart[id] = parseInt(value) || 1;
+    updateOrder();
+}
+
+function updateOrder() {
+    const summaryEl = document.getElementById('orderSummary');
+    const ids = Object.keys(cart);
+
+    if (ids.length === 0) {
+        summaryEl.innerHTML = '<div class="empty">No items selected yet</div>';
+        document.getElementById('orderTotal').textContent = '$0.00 AUD';
+        return;
+    }
+
+    let total = 0;
+    summaryEl.innerHTML = ids.map(id => {
+        const product = PRODUCTS.find(p => p.id === id);
+        const qty = cart[id];
+        const lineTotal = product.price * qty;
+        total += lineTotal;
+        return `<div><span>${qty}x ${product.name}</span><span>$${lineTotal.toFixed(2)}</span></div>`;
+    }).join('');
+
+    document.getElementById('orderTotal').textContent = `$${total.toFixed(2)} AUD`;
+}
+
+function goToCheckout() {
+    const ids = Object.keys(cart);
+    if (ids.length === 0) {
+        document.getElementById('error-message').textContent = 'Please select at least one product first.';
+        return;
+    }
+
+    let total = 0;
+    const productSummary = ids.map(id => {
+        const product = PRODUCTS.find(p => p.id === id);
+        const qty = cart[id];
+        total += product.price * qty;
+        return `${qty}x ${product.name}`;
+    }).join(', ');
+
+    localStorage.setItem('product', productSummary);
+    localStorage.setItem('price', total.toFixed(2));
+
+    window.location.href = 'checkout.html';
+}
+
+// Mobile menu (same behavior as other pages)
+function toggleMenu(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    const menu = document.getElementById('navLinks');
+    const body = document.body;
+
+    menu.classList.toggle('active');
+    body.classList.toggle('menu-open');
+
+    const spans = document.querySelectorAll('.mobile-menu-btn span');
+    if (menu.classList.contains('active')) {
+        spans[0].style.transform = "rotate(45deg) translate(5px, 5px)";
+        spans[1].style.opacity = "0";
+        spans[2].style.transform = "rotate(-45deg) translate(5px, -5px)";
+    } else {
+        spans[0].style.transform = "none";
+        spans[1].style.opacity = "1";
+        spans[2].style.transform = "none";
+    }
+    return false;
+}
+
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('navLinks');
+    const btn = document.querySelector('.mobile-menu-btn');
+
+    if (menu.classList.contains('active') &&
+        !menu.contains(e.target) &&
+        !btn.contains(e.target)) {
+        toggleMenu();
+    }
+});
+
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', function() {
+        if (window.innerWidth <= 968) {
+            toggleMenu();
+        }
+    });
+});
+
+renderProducts();
+</script>
+
+<div style="background-color: #f8d7da; color: #721c24; padding: 15px; text-align: center; font-weight: bold; border: 1px solid #f5c6cb; margin-top: 20px;">
+    IMPORTANT: All products on this site are for laboratory research use only. NOT FOR HUMAN CONSUMPTION.
+</div>
+</body>
+</html>
