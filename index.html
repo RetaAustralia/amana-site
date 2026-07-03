@@ -246,6 +246,13 @@
   .btn-outline:hover { background: hsl(var(--muted)); }
 
   .hero-media { position: relative; }
+  .hero-media img.hero-img {
+    width: 100%;
+    aspect-ratio: 4/3.2;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+  }
   .hero-media .img-placeholder {
     width: 100%; aspect-ratio: 4/3.2;
     background: repeating-linear-gradient(45deg, hsl(var(--muted)), hsl(var(--muted)) 10px, #fff 10px, #fff 20px);
@@ -284,6 +291,13 @@
   .welcome-section h2 { font-size: 28px; margin-bottom: 1rem; }
   .welcome-section p { font-size: 14px; line-height: 1.7; color: hsl(var(--muted-foreground)); margin-bottom: 1rem; }
   .welcome-media .img-placeholder { aspect-ratio: 16/11; border-radius: 16px; }
+  .welcome-media img {
+    width: 100%;
+    aspect-ratio: 16/11;
+    object-fit: cover;
+    border-radius: 16px;
+    display: block;
+  }
 
   /* STAT ICONS */
   .stats-strip { border-bottom: 1px solid hsl(var(--border)); padding: 3.5rem 0; }
@@ -475,14 +489,14 @@
             </div>
           </div>
           <div class="hero-media">
- <img src="productpic2.png" alt="Product" class="hero-img">
+            <img src="productpic2.png" alt="Product" class="hero-img">
             <div class="stat-chip top">
               <p class="label">PURITY</p>
               <p class="value">99.8%</p>
             </div>
             <div class="stat-chip bottom">
               <p class="label">BATCH</p>
-              <p class="value">JP20260015</p>
+              <p class="value">JP5208</p>
             </div>
           </div>
         </div>
@@ -499,7 +513,7 @@
           <a href="#" class="btn btn-primary">Check out Retatrutide</a>
         </div>
         <div class="welcome-media">
-<img src="product3.png" alt="Product" class="hero-img">
+          <img src="product3.png" alt="Product">
         </div>
       </div>
     </section>
@@ -544,8 +558,8 @@
       <div class="footer-section">
         <h4>Product</h4>
         <ul>
-          <li><a href="product.html">Retatrutide</a></li>
-          <li><a href="other.html">Other Peptides</a></li>
+          <li><a href="product.html">Pens & Vials</a></li>
+          <li><a href="dosing.html">Protocol</a></li>
         </ul>
       </div>
 
