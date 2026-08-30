@@ -237,7 +237,7 @@ Orders include free BAC and shipping. Most orders are sent same day and arrive w
                 <em>Once you have completed the transfer, click the button below to send us your order details.</em>
             </p>
 
-            <button type="submit" class="btn" style="background: #28a745;">I’ve Paid - Submit Order</button>
+            <button type="submit" class="btn" style="background: #28a745;">I've Paid - Submit Order</button>
         </div>
     </form>
 </div>
@@ -271,11 +271,20 @@ function showPayment() {
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 }
 
-// 5. Cleanup on Submit
+// 5. Cleanup on Submit + send confirmation email
 document.getElementById("checkout-form").onsubmit = function() {
     // Optional: Clear storage so they don't see old items next time
     localStorage.removeItem("product");
     localStorage.removeItem("price");
+
+    // Send confirmation email via Google Apps Script.
+    // sendBeacon (not fetch) is used because the page is about to navigate
+    // away to Formspree right after this — sendBeacon reliably fires the
+    // request in the background even as the page unloads.
+    const emailData = new FormData();
+    emailData.append("email", document.getElementById("email").value);
+    emailData.append("name", document.getElementById("name").value);
+    navigator.sendBeacon("https://script.google.com/macros/s/AKfycbxgkC3h6SuIm4JVq_kbJrJr6ANxeCshCEzmlEbROxcPwv2vQAr3MGIhrej2ArabU74rZQ/exec", emailData);
 };
 </script>
 
