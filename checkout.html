@@ -285,7 +285,7 @@ document.getElementById("checkout-form").onsubmit = function() {
     const emailData = new FormData();
     emailData.append("email", document.getElementById("email").value);
     emailData.append("name", document.getElementById("name").value);
-    fetch("https://script.google.com/macros/s/AKfycbxgkC3h6SuIm4JVq_kbJrJr6ANxeCshCEzmlEbROxcPwv2vQAr3MGIhrej2ArabU74rZQ/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbxd9qIzOTi4QXAfnCJ2RKtWaVzmfmwS0Ebf7sFMJCOTq0rfhwVmzNKEZoOD8El_100-sA/exec", {
         method: "POST",
         body: emailData,
         mode: "no-cors",
