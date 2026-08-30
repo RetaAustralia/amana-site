@@ -278,13 +278,19 @@ document.getElementById("checkout-form").onsubmit = function() {
     localStorage.removeItem("price");
 
     // Send confirmation email via Google Apps Script.
-    // sendBeacon (not fetch) is used because the page is about to navigate
-    // away to Formspree right after this — sendBeacon reliably fires the
-    // request in the background even as the page unloads.
+    // NOTE: navigator.sendBeacon does NOT work reliably with Apps Script,
+    // because the /exec URL responds with a redirect and sendBeacon doesn't
+    // follow it correctly. fetch(..., {keepalive:true}) follows the redirect
+    // AND still survives the page navigating away right after, like sendBeacon would.
     const emailData = new FormData();
     emailData.append("email", document.getElementById("email").value);
     emailData.append("name", document.getElementById("name").value);
-    navigator.sendBeacon("https://script.google.com/macros/s/AKfycbxgkC3h6SuIm4JVq_kbJrJr6ANxeCshCEzmlEbROxcPwv2vQAr3MGIhrej2ArabU74rZQ/exec", emailData);
+    fetch("https://script.google.com/macros/s/AKfycbxgkC3h6SuIm4JVq_kbJrJr6ANxeCshCEzmlEbROxcPwv2vQAr3MGIhrej2ArabU74rZQ/exec", {
+        method: "POST",
+        body: emailData,
+        mode: "no-cors",
+        keepalive: true
+    });
 };
 </script>
 
