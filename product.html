@@ -755,7 +755,8 @@ function updateSelection() {
         if (quantity === 2) total = 169.95;
         else if (quantity === 3) total = 249.95;
         else if (quantity === 4) total = 319.95;
-        else if (quantity >= 5) total = 349.95;
+        else if (quantity === 5) total = 349.95;
+        else if (quantity > 5) total = 349.95 + (quantity - 5) * 69.99;
     }
 
     document.getElementById("price-display").textContent = `$${total.toFixed(2)} AUD`;
@@ -774,7 +775,8 @@ function goToCheckout() {
         if (quantity === 2) total = 169.95;
         else if (quantity === 3) total = 249.95;
         else if (quantity === 4) total = 319.95;
-        else if (quantity >= 5) total = 349.95;
+        else if (quantity === 5) total = 349.95;
+        else if (quantity > 5) total = 349.95 + (quantity - 5) * 69.99
     }
 
     // SAVE TO MEMORY
