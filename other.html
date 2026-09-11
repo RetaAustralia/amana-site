@@ -107,6 +107,54 @@
             }
         }
 
+        /* Cart icon + dropdown */
+        .nav-right { display: flex; align-items: center; gap: 1.25rem; }
+        @media (max-width: 968px) { .nav-right { margin-right: 60px; } }
+
+        .cart-wrapper { position: relative; display: flex; align-items: center; }
+        .cart-icon-btn {
+            background: none; border: none; cursor: pointer;
+            position: relative; padding: 8px; display: flex; align-items: center;
+            color: var(--dark);
+        }
+        .cart-icon-btn:hover { color: var(--primary); }
+        .cart-icon-btn svg { width: 24px; height: 24px; }
+
+        .cart-badge {
+            position: absolute; top: 2px; right: 2px;
+            background: var(--primary); color: white;
+            font-size: 11px; font-weight: 800; line-height: 1;
+            border-radius: 999px; min-width: 18px; height: 18px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px;
+        }
+        .cart-badge.hidden { display: none; }
+
+        .cart-dropdown {
+            position: absolute; top: calc(100% + 14px); right: -10px;
+            width: 300px; max-width: 88vw;
+            background: white; border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+            padding: 1.25rem; text-align: left;
+            display: none; z-index: 10001;
+        }
+        .cart-dropdown.active { display: block; }
+        .cart-dropdown::before {
+            content: ''; position: absolute; top: -6px; right: 20px;
+            width: 12px; height: 12px; background: white;
+            transform: rotate(45deg);
+            box-shadow: -3px -3px 6px rgba(0,0,0,0.03);
+        }
+        .cart-dropdown-summary { font-size: 0.9rem; color: #444; margin-bottom: 0.75rem; max-height: 220px; overflow-y: auto; }
+        .cart-dropdown-summary div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; }
+        .cart-dropdown-summary .empty { color: #999; font-style: italic; text-align: center; padding: 12px 0; }
+        .cart-dropdown-total {
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 900; font-size: 1.1rem; color: var(--primary);
+            padding-top: 0.75rem; border-top: 1px solid #eee; margin-bottom: 1rem;
+        }
+        .cart-dropdown .btn-primary { width: 100%; padding: 0.9rem; font-size: 0.9rem; }
+
         /* SHOP */
         .shop-header { text-align: center; padding: 3rem 1.5rem 1rem; max-width: 700px; margin: 0 auto; }
         .shop-header h1 { font-size: 2.2rem; margin-bottom: 0.75rem; color: var(--dark); }
@@ -222,20 +270,44 @@
     <div class="nav-container">
         <a href="index.html" class="logo"><img src="logo.png" alt="AMANA Therapeutics Logo"></a>
 
+        <div class="nav-right">
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="product.html">Retatrutide</a></li>
+                <li><a href="other.html">Other Peptides</a></li>
+                <li><a href="faq.html">FAQs</a></li>
+                <li><a href="contact.html">Contact Us</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+
+            <div class="cart-wrapper">
+                <button type="button" class="cart-icon-btn" id="cartIconBtn" onclick="toggleCartDropdown(event)" aria-label="View cart">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                        <path d="M3 6h18"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    <span class="cart-badge hidden" id="cartBadge">0</span>
+                </button>
+
+                <div class="cart-dropdown" id="cartDropdown">
+                    <div class="cart-dropdown-summary" id="cartDropdownSummary">
+                        <div class="empty">No items selected yet</div>
+                    </div>
+                    <div class="cart-dropdown-total">
+                        <span>Total</span>
+                        <span id="cartDropdownTotal">$0.00 AUD</span>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="goToCheckout()">Secure Checkout</button>
+                </div>
+            </div>
+        </div>
+
         <button type="button" class="mobile-menu-btn" onclick="toggleMenu(event)" aria-label="Toggle Navigation">
             <span></span>
             <span></span>
             <span></span>
         </button>
-
-        <ul class="nav-links" id="navLinks">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="product.html">Retatrutide</a></li>
-            <li><a href="other.html">Other Peptides</a></li>
-            <li><a href="faq.html">FAQs</a></li>
-            <li><a href="contact.html">Contact Us</a></li>
-            <li><a href="about.html">About</a></li>
-        </ul>
     </div>
 </nav>
 
@@ -327,11 +399,11 @@ const PRODUCTS = [
     { id: "p2", name: "BPC-157 10mg",        price: 59.95, stock: "in",  maxQty: 5 },
     { id: "p3", name: "TB-500 10mg",         price: 79.95, stock: "in",  maxQty: 5 },
     { id: "p4", name: "Semax 10mg",          price: 49.95, stock: "in",  maxQty: 5 },
-    { id: "p5", name: "Selank 10mg",         price: 49.95, stock: "low", maxQty: 4 },
-    { id: "p6", name: "NAD+ 500mg",          price: 69.95, stock: "low", maxQty: 4 },
+    { id: "p5", name: "Selank 10mg",         price: 49.95, stock: "low", maxQty: 5 },
+    { id: "p6", name: "NAD+ 500mg",          price: 69.95, stock: "low", maxQty: 5 },
     { id: "p7", name: "Tesamorelin 10mg",    price: 79.95, stock: "in",  maxQty: 5 },
-    { id: "p8", name: "KPV 10mg",            price: 39.95, stock: "low", maxQty: 2 },
-    { id: "p9", name: "Glutathione 600mg",   price: 49.95, stock: "low", maxQty: 4 }
+    { id: "p8", name: "KPV 10mg",            price: 39.95, stock: "low", maxQty: 5 },
+    { id: "p9", name: "Glutathione 600mg",   price: 49.95, stock: "low", maxQty: 5 }
 ];
 /* ========================================================= */
 
@@ -382,6 +454,7 @@ function toggleProduct(id) {
         cart[id] = parseInt(qtySelect.value) || 1;
         qtySelect.disabled = false;
         card.classList.add('selected');
+        openCartDropdown();
     } else {
         delete cart[id];
         qtySelect.disabled = true;
@@ -405,24 +478,54 @@ function setQty(id, value) {
 
 function updateOrder() {
     const summaryEl = document.getElementById('orderSummary');
+    const dropdownSummaryEl = document.getElementById('cartDropdownSummary');
     const ids = Object.keys(cart);
 
     if (ids.length === 0) {
-        summaryEl.innerHTML = '<div class="empty">No items selected yet</div>';
+        const emptyHtml = '<div class="empty">No items selected yet</div>';
+        summaryEl.innerHTML = emptyHtml;
+        dropdownSummaryEl.innerHTML = emptyHtml;
         document.getElementById('orderTotal').textContent = '$0.00 AUD';
+        document.getElementById('cartDropdownTotal').textContent = '$0.00 AUD';
+        setCartBadge(0);
         return;
     }
 
     let total = 0;
-    summaryEl.innerHTML = ids.map(id => {
+    let itemCount = 0;
+    const rowsHtml = ids.map(id => {
         const product = PRODUCTS.find(p => p.id === id);
         const qty = cart[id];
         const lineTotal = product.price * qty;
         total += lineTotal;
+        itemCount += qty;
         return `<div><span>${qty}x ${product.name}</span><span>$${lineTotal.toFixed(2)}</span></div>`;
     }).join('');
 
+    summaryEl.innerHTML = rowsHtml;
+    dropdownSummaryEl.innerHTML = rowsHtml;
     document.getElementById('orderTotal').textContent = `$${total.toFixed(2)} AUD`;
+    document.getElementById('cartDropdownTotal').textContent = `$${total.toFixed(2)} AUD`;
+    setCartBadge(itemCount);
+}
+
+function setCartBadge(count) {
+    const badge = document.getElementById('cartBadge');
+    badge.textContent = count;
+    badge.classList.toggle('hidden', count === 0);
+}
+
+function openCartDropdown() {
+    document.getElementById('cartDropdown').classList.add('active');
+}
+
+function closeCartDropdown() {
+    document.getElementById('cartDropdown').classList.remove('active');
+}
+
+function toggleCartDropdown(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    document.getElementById('cartDropdown').classList.toggle('active');
 }
 
 function goToCheckout() {
@@ -480,6 +583,11 @@ document.addEventListener('click', function(e) {
         !menu.contains(e.target) &&
         !btn.contains(e.target)) {
         toggleMenu();
+    }
+
+    const cartWrapper = document.querySelector('.cart-wrapper');
+    if (!cartWrapper.contains(e.target)) {
+        closeCartDropdown();
     }
 });
 
