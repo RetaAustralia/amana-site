@@ -315,22 +315,23 @@
 
 <script>
 /* =========================================================
-   EDIT YOUR PRODUCTS, PRICES + STOCK STATUS HERE.
+   EDIT YOUR PRODUCTS, PRICES, STOCK STATUS + MAX QTY HERE.
    stock accepts exactly one of: "in", "low", "out"
      "in"  -> green "In Stock"
      "low" -> yellow "Low Stock"
      "out" -> red "Out of Stock" (card is disabled, can't be selected)
+   maxQty -> the highest quantity a customer can select for that item
    ========================================================= */
 const PRODUCTS = [
-    { id: "p1", name: "GHK-CU 50mg",           price: 49.95, stock: "in"  },
-    { id: "p2", name: "BPC-157 10mg",                price: 59.95, stock: "in"  },
-    { id: "p3", name: "TB-500 10mg",                 price: 79.95, stock: "in" },
-    { id: "p4", name: "Semax 10mg", price: 49.95, stock: "in"  },
-    { id: "p5", name: "Selank 10mg",             price: 49.95, stock: "low"  },
-    { id: "p6", name: "NAD+ 500mg",            price: 69.95, stock: "low" },
-    { id: "p7", name: "Tesamorelin 10mg",           price: 79.95, stock: "in"  },
-    { id: "p8", name: "KPV 10mg",                price: 39.95, stock: "low"  },
-    { id: "p9", name: "Glutathione 600mg",            price: 49.95, stock: "low" }
+    { id: "p1", name: "GHK-CU 50mg",         price: 49.95, stock: "in",  maxQty: 5 },
+    { id: "p2", name: "BPC-157 10mg",        price: 59.95, stock: "in",  maxQty: 5 },
+    { id: "p3", name: "TB-500 10mg",         price: 79.95, stock: "in",  maxQty: 5 },
+    { id: "p4", name: "Semax 10mg",          price: 49.95, stock: "in",  maxQty: 5 },
+    { id: "p5", name: "Selank 10mg",         price: 49.95, stock: "low", maxQty: 5 },
+    { id: "p6", name: "NAD+ 500mg",          price: 69.95, stock: "low", maxQty: 5 },
+    { id: "p7", name: "Tesamorelin 10mg",    price: 79.95, stock: "in",  maxQty: 5 },
+    { id: "p8", name: "KPV 10mg",            price: 39.95, stock: "low", maxQty: 5 },
+    { id: "p9", name: "Glutathione 600mg",   price: 49.95, stock: "low", maxQty: 5 }
 ];
 /* ========================================================= */
 
@@ -343,6 +344,11 @@ function renderProducts() {
     const grid = document.getElementById('shopGrid');
     grid.innerHTML = PRODUCTS.map(p => {
         const disabled = p.stock === "out";
+        const max = p.maxQty || 5; // fallback if maxQty isn't set
+        const options = Array.from({ length: max }, (_, i) => i + 1)
+            .map(n => `<option value="${n}">Qty: ${n}</option>`)
+            .join('');
+
         return `
         <div class="product-card${disabled ? ' out-of-stock' : ''}" id="card-${p.id}">
             <div class="stock-badge ${p.stock}">
@@ -357,11 +363,7 @@ function renderProducts() {
                     Add
                 </label>
                 <select class="qty-select" id="qty-${p.id}" disabled onchange="setQty('${p.id}', this.value)">
-                    <option value="1">Qty: 1</option>
-                    <option value="2">Qty: 2</option>
-                    <option value="3">Qty: 3</option>
-                    <option value="4">Qty: 4</option>
-                    <option value="5">Qty: 5</option>
+                    ${options}
                 </select>
             </div>
         </div>`;
@@ -392,7 +394,12 @@ function toggleProduct(id) {
 
 function setQty(id, value) {
     if (!(id in cart)) return;
-    cart[id] = parseInt(value) || 1;
+    const product = PRODUCTS.find(p => p.id === id);
+    const max = product.maxQty || 5;
+    let qty = parseInt(value) || 1;
+    if (qty > max) qty = max;
+    if (qty < 1) qty = 1;
+    cart[id] = qty;
     updateOrder();
 }
 
