@@ -180,7 +180,12 @@
             transition: 0.2s ease;
         }
         .product-card.selected { border-color: var(--primary); box-shadow: 0 8px 25px rgba(30,90,158,0.15); }
-        .product-card.out-of-stock { opacity: 0.55; }
+        .product-card.out-of-stock { opacity: 0.55; transition: opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+        .product-card.out-of-stock.notify-active {
+            opacity: 1;
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(30,90,158,0.15);
+        }
 
         /* Stock status pill (same visual language as the "LIVE NOW" badge) */
         .stock-badge {
@@ -211,6 +216,60 @@
         .qty-select { padding: 8px 10px; border-radius: 8px; border: 2px solid #ddd; font-size: 0.9rem; }
         .qty-select:disabled { opacity: 0.4; cursor: not-allowed; }
 
+        /* Notify-me (out-of-stock request) */
+        .notify-row {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+        }
+        .notify-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+
+        .notify-form {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease, margin-top 0.25s ease;
+            margin-top: 0;
+        }
+        .notify-form.open { max-height: 160px; margin-top: 1rem; }
+
+        .notify-input {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            margin-bottom: 0.6rem;
+        }
+        .notify-input:focus { outline: none; border-color: var(--primary); }
+
+        .notify-submit {
+            width: 100%;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .notify-submit:hover { opacity: 0.9; }
+
+        .notify-confirm {
+            display: none;
+            font-size: 0.85rem;
+            color: var(--success);
+            font-weight: 700;
+            margin-top: 0.75rem;
+        }
+        .notify-confirm.show { display: block; }
+        .notify-error {
+            display: none;
+            font-size: 0.8rem;
+            color: #b91c1c;
+            margin-top: 0.5rem;
+        }
+        .notify-error.show { display: block; }
+
         .order-panel {
             max-width: 480px;
             margin: 2.5rem auto 4rem;
@@ -229,6 +288,24 @@
         .btn-primary { background: var(--primary); color: white; width: 100%; max-width: 300px; }
         #error-message { color: red; margin-top: 1rem; min-height: 1.2rem; }
 
+        /* Header phone display */
+        .header-phone {
+            display: inline-block;
+            margin-top: 1rem;
+            text-decoration: none;
+        }
+        .header-phone .phone-line {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: 0.02em;
+        }
+        .header-phone .phone-sub {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 0.25rem;
+        }
+
         /* Request section */
         .request-section {
             text-align: center;
@@ -246,6 +323,68 @@
             border: 2px solid var(--primary);
         }
         .btn-outline-request:hover { background: var(--primary); color: white; }
+
+        /* Request chips (Option C) */
+        .chip-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        .chip {
+            padding: 0.5rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            color: #444;
+            transition: 0.15s;
+        }
+        .chip:hover { border-color: var(--primary); }
+        .chip.selected { background: var(--primary); border-color: var(--primary); color: white; }
+
+        .chip-contact-form {
+            display: none;
+            margin-top: 1.25rem;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .chip-contact-form.open { display: flex; }
+        .chip-contact-form input {
+            flex: 1;
+            min-width: 220px;
+            padding: 0.8rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        .chip-contact-form input:focus { outline: none; border-color: var(--primary); }
+        .chip-contact-form button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .chip-contact-form button:hover { opacity: 0.9; }
+
+        .chip-request-confirm {
+            display: none;
+            font-size: 0.85rem;
+            color: var(--success);
+            font-weight: 700;
+            margin-top: 1rem;
+        }
+        .chip-request-confirm.show { display: block; }
+        .chip-request-error {
+            display: none;
+            font-size: 0.8rem;
+            color: #b91c1c;
+            margin-top: 0.6rem;
+        }
+        .chip-request-error.show { display: block; }
 
         /* Footer (matches other pages) */
         .site-footer { background: #1a1a1a; color: white; padding: 4rem 5% 2rem; margin-top: 4rem; }
@@ -331,7 +470,12 @@
 
 <div class="shop-header">
     <h1>Shop Other Peptides</h1>
-    <p>We periodically stock other peptides per customer requests. If you'd like to request a re-stock or other peptide, fill in our contact form to let us know and we will get you sorted ASAP.</p>
+    <p>We periodically stock other peptides per customer requests. If you'd like to request a re-stock or other peptide let us know and we will get you sorted ASAP.</p>
+    <h2>Want something else? We'll get you sorted.</h2>
+    <a href="tel:0477932965" class="header-phone">
+        <div class="phone-line">📱 0477 932 965</div>
+        <div class="phone-sub">Tap to text us</div>
+    </a>
 </div>
 
 <div class="shop-grid" id="shopGrid"></div>
@@ -348,9 +492,22 @@
 </div>
 
 <section class="request-section">
-    <h2>Don't See What You're Looking For?</h2>
-    <p>Let us know what you're looking for and we can usually sort you out within a couple weeks.</p>
-    <a href="contact.html" class="btn btn-outline-request">Request</a>
+    <h2>Can't find what you're looking for?</h2>
+    <p>Tap what you're after, or let us know what it is — takes 5 seconds.</p>
+
+    <div class="chip-row" id="requestChipRow">
+        <div class="chip" onclick="selectRequestChip(this, 'CJC-1295')">CJC-1295</div>
+        <div class="chip" onclick="selectRequestChip(this, 'Testosterone')">Testosterone</div>
+        <div class="chip" onclick="selectRequestChip(this, 'KPV')">KPV</div>
+        <div class="chip" onclick="selectRequestChip(this, 'Something else')">Something else</div>
+    </div>
+
+    <div class="chip-contact-form" id="requestChipForm">
+        <input type="text" id="requestChipInput" placeholder="Your email or phone number">
+        <button type="button" onclick="submitRequestChip()">Send</button>
+    </div>
+    <div class="chip-request-error" id="requestChipError">Please enter an email or phone number.</div>
+    <div class="chip-request-confirm" id="requestChipConfirm">✓ Thanks — we'll be in touch.</div>
 </section>
 
 <footer class="site-footer">
@@ -409,6 +566,16 @@ const PRODUCTS = [
 
 const STOCK_LABELS = { in: "In Stock", low: "Low Stock", out: "Out of Stock" };
 
+/* =========================================================
+   FORMSPREE ENDPOINT — paste your Formspree form URL here.
+   Sign up free at https://formspree.io, create a form, and
+   it'll give you a URL like https://formspree.io/f/xxxxabcd
+   Paste it below (keep the quotes). Submissions will land in
+   the inbox/dashboard tied to that Formspree form.
+   ========================================================= */
+const NOTIFY_FORM_ENDPOINT = "https://formspree.io/f/mojjdqbe";
+/* ========================================================= */
+
 // cart is a map of productId -> quantity, only for checked items
 const cart = {};
 
@@ -421,6 +588,32 @@ function renderProducts() {
             .map(n => `<option value="${n}">Qty: ${n}</option>`)
             .join('');
 
+        // Out-of-stock items automatically get a "Notify Me" request
+        // form instead of the Add/qty controls — no manual setup needed
+        // per product, this is driven entirely by stock: "out" above.
+        const controlsHtml = disabled ? `
+            <label class="notify-row">
+                <input type="checkbox" id="notifyCheck-${p.id}" onchange="toggleNotifyForm('${p.id}')">
+                Notify me when back in stock
+            </label>
+            <div class="notify-form" id="notifyForm-${p.id}">
+                <input class="notify-input" id="notifyContact-${p.id}" type="text" placeholder="Email or phone number">
+                <button type="button" class="notify-submit" onclick="submitNotify('${p.id}')">Notify Me</button>
+                <div class="notify-error" id="notifyError-${p.id}">Please enter an email or phone number.</div>
+            </div>
+            <div class="notify-confirm" id="notifyConfirm-${p.id}">✓ We'll let you know when it's back.</div>
+        ` : `
+            <div class="card-controls">
+                <label class="select-row">
+                    <input type="checkbox" id="check-${p.id}" onchange="toggleProduct('${p.id}')">
+                    Add
+                </label>
+                <select class="qty-select" id="qty-${p.id}" disabled onchange="setQty('${p.id}', this.value)">
+                    ${options}
+                </select>
+            </div>
+        `;
+
         return `
         <div class="product-card${disabled ? ' out-of-stock' : ''}" id="card-${p.id}">
             <div class="stock-badge ${p.stock}">
@@ -429,17 +622,59 @@ function renderProducts() {
             </div>
             <h3>${p.name}</h3>
             <div class="price">$${p.price.toFixed(2)} AUD</div>
-            <div class="card-controls">
-                <label class="select-row">
-                    <input type="checkbox" id="check-${p.id}" ${disabled ? 'disabled' : ''} onchange="toggleProduct('${p.id}')">
-                    Add
-                </label>
-                <select class="qty-select" id="qty-${p.id}" disabled onchange="setQty('${p.id}', this.value)">
-                    ${options}
-                </select>
-            </div>
+            ${controlsHtml}
         </div>`;
     }).join('');
+}
+
+function toggleNotifyForm(id) {
+    const checked = document.getElementById(`notifyCheck-${id}`).checked;
+    document.getElementById(`notifyForm-${id}`).classList.toggle('open', checked);
+    document.getElementById(`card-${id}`).classList.toggle('notify-active', checked);
+    if (!checked) {
+        document.getElementById(`notifyConfirm-${id}`).classList.remove('show');
+        document.getElementById(`notifyError-${id}`).classList.remove('show');
+    }
+}
+
+async function submitNotify(id) {
+    const product = PRODUCTS.find(p => p.id === id);
+    const input = document.getElementById(`notifyContact-${id}`);
+    const contact = input.value.trim();
+    const errorEl = document.getElementById(`notifyError-${id}`);
+
+    if (!contact) {
+        errorEl.classList.add('show');
+        input.style.borderColor = '#ef4444';
+        return;
+    }
+    errorEl.classList.remove('show');
+    input.style.borderColor = '#ddd';
+
+    // Sends the request to Formspree so it lands somewhere you can
+    // actually see it (inbox / Formspree dashboard). If the endpoint
+    // hasn't been set yet, it just logs to the console instead so the
+    // UI still works while you're testing.
+    if (NOTIFY_FORM_ENDPOINT && NOTIFY_FORM_ENDPOINT.startsWith('http')) {
+        try {
+            await fetch(NOTIFY_FORM_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    product: product.name,
+                    contact: contact,
+                    message: `Notify-me request for ${product.name} (out of stock)`
+                })
+            });
+        } catch (err) {
+            console.error('Notify request failed to send:', err);
+        }
+    } else {
+        console.log('[DEMO] Notify request (no Formspree endpoint set yet):', product.name, contact);
+    }
+
+    document.getElementById(`notifyForm-${id}`).classList.remove('open');
+    document.getElementById(`notifyConfirm-${id}`).classList.add('show');
 }
 
 function toggleProduct(id) {
@@ -598,6 +833,62 @@ document.querySelectorAll('.nav-links a').forEach(link => {
         }
     });
 });
+
+// "Looking For Something Specific?" chip request (Option C)
+let selectedRequestChip = null;
+
+function selectRequestChip(el, label) {
+    document.querySelectorAll('#requestChipRow .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedRequestChip = label;
+
+    const form = document.getElementById('requestChipForm');
+    const input = document.getElementById('requestChipInput');
+    form.classList.add('open');
+    document.getElementById('requestChipError').classList.remove('show');
+    document.getElementById('requestChipConfirm').classList.remove('show');
+
+    input.placeholder = label === 'Something else'
+        ? "Product name + your email or phone"
+        : "Your email or phone number";
+}
+
+async function submitRequestChip() {
+    const input = document.getElementById('requestChipInput');
+    const value = input.value.trim();
+    const errorEl = document.getElementById('requestChipError');
+
+    if (!selectedRequestChip || !value) {
+        errorEl.classList.add('show');
+        input.style.borderColor = '#ef4444';
+        return;
+    }
+    errorEl.classList.remove('show');
+    input.style.borderColor = '#ddd';
+
+    // Sends to the same Formspree endpoint used for out-of-stock
+    // notify-me requests above, so everything lands in one place.
+    if (NOTIFY_FORM_ENDPOINT && NOTIFY_FORM_ENDPOINT.startsWith('http')) {
+        try {
+            await fetch(NOTIFY_FORM_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requestType: selectedRequestChip,
+                    contact: value,
+                    message: `Product request: ${selectedRequestChip}`
+                })
+            });
+        } catch (err) {
+            console.error('Request failed to send:', err);
+        }
+    } else {
+        console.log('[DEMO] Chip request (no Formspree endpoint set yet):', selectedRequestChip, value);
+    }
+
+    document.getElementById('requestChipForm').classList.remove('open');
+    document.getElementById('requestChipConfirm').classList.add('show');
+}
 
 renderProducts();
 </script>
