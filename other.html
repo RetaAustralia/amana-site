@@ -160,7 +160,9 @@
             position: fixed;
             top: 20px;
             left: 50%;
-            transform: translateX(-50%) translateY(-150%);
+            transform: translateX(-50%) translateY(-20px);
+            opacity: 0;
+            pointer-events: none;
             background: var(--success);
             color: white;
             padding: 14px 26px;
@@ -169,11 +171,11 @@
             font-size: 0.92rem;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             z-index: 10050;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease;
             max-width: 90vw;
             text-align: center;
         }
-        .cart-toast.show { transform: translateX(-50%) translateY(0); }
+        .cart-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
 
         /* SHOP */
         .shop-header { text-align: center; padding: 3rem 1.5rem 1rem; max-width: 700px; margin: 0 auto; }
@@ -492,11 +494,10 @@
 
 <div class="shop-header">
     <h1>Shop Other Peptides</h1>
-    <p>We periodically stock other peptides per customer requests. If you'd like to request a re-stock or other peptide let us know and we will get you sorted ASAP.</p>
-    <h2>Want something else? We'll get you sorted.</h2>
-    <a href="sms:0477932965" class="header-phone">
-        <div class="phone-line">📱 0477 932 965</div>
-        <div class="phone-sub">Tap to text us</div>
+    <p>We periodically stock other peptides per customer requests. If you'd like to request a re-stock or other peptide, fill in our contact form to let us know and we will get you sorted ASAP.</p>
+    <a href="tel:0400000000" class="header-phone">
+        <div class="phone-line">📱 0400 000 000</div>
+        <div class="phone-sub">Tap to call or text on mobile</div>
     </a>
 </div>
 
@@ -514,13 +515,13 @@
 </div>
 
 <section class="request-section">
-    <h2>Can't find what you're looking for??</h2>
+    <h2>Looking For Something Specific?</h2>
     <p>Tap what you're after, or let us know something else — takes 5 seconds.</p>
 
     <div class="chip-row" id="requestChipRow">
-        <div class="chip" onclick="selectRequestChip(this, 'CJC-1295')">CJC-1295</div>
-        <div class="chip" onclick="selectRequestChip(this, 'Testosterone')">Testosterone</div>
-        <div class="chip" onclick="selectRequestChip(this, 'KPV')">KPV</div>
+        <div class="chip" onclick="selectRequestChip(this, 'BPC-157')">BPC-157</div>
+        <div class="chip" onclick="selectRequestChip(this, 'TB-500')">TB-500</div>
+        <div class="chip" onclick="selectRequestChip(this, 'Tirzepatide')">Tirzepatide</div>
         <div class="chip" onclick="selectRequestChip(this, 'Something else')">Something else</div>
     </div>
 
@@ -604,7 +605,7 @@ function showCartToast(message) {
    Paste it below (keep the quotes). Submissions will land in
    the inbox/dashboard tied to that Formspree form.
    ========================================================= */
-const NOTIFY_FORM_ENDPOINT = "https://formspree.io/f/mojjdqbe";
+const NOTIFY_FORM_ENDPOINT = "PASTE_YOUR_FORMSPREE_URL_HERE";
 /* ========================================================= */
 
 // cart is a map of productId -> quantity, only for checked items
@@ -743,12 +744,38 @@ function setQty(id, value) {
     updateOrder();
 }
 
+// Reads whatever's already been added to the cart from another page
+// (e.g. product.html), so it isn't invisible until you check out here too.
+function getExistingCart() {
+    const productStr = localStorage.getItem('product');
+    return {
+        items: productStr ? productStr.split(', ') : [],
+        price: parseFloat(localStorage.getItem('price')) || 0
+    };
+}
+
 function updateOrder() {
     const summaryEl = document.getElementById('orderSummary');
     const dropdownSummaryEl = document.getElementById('cartDropdownSummary');
     const ids = Object.keys(cart);
+    const existing = getExistingCart();
 
-    if (ids.length === 0) {
+    let total = existing.price;
+    let itemCount = existing.items.length;
+
+    const liveRowsHtml = ids.map(id => {
+        const product = PRODUCTS.find(p => p.id === id);
+        const qty = cart[id];
+        const lineTotal = product.price * qty;
+        total += lineTotal;
+        itemCount += qty;
+        return `<div><span>${qty}x ${product.name}</span><span>$${lineTotal.toFixed(2)}</span></div>`;
+    }).join('');
+
+    const existingRowsHtml = existing.items.map(item => `<div><span>${item}</span></div>`).join('');
+    const rowsHtml = existingRowsHtml + liveRowsHtml;
+
+    if (!rowsHtml) {
         const emptyHtml = '<div class="empty">No items selected yet</div>';
         summaryEl.innerHTML = emptyHtml;
         dropdownSummaryEl.innerHTML = emptyHtml;
@@ -757,17 +784,6 @@ function updateOrder() {
         setCartBadge(0);
         return;
     }
-
-    let total = 0;
-    let itemCount = 0;
-    const rowsHtml = ids.map(id => {
-        const product = PRODUCTS.find(p => p.id === id);
-        const qty = cart[id];
-        const lineTotal = product.price * qty;
-        total += lineTotal;
-        itemCount += qty;
-        return `<div><span>${qty}x ${product.name}</span><span>$${lineTotal.toFixed(2)}</span></div>`;
-    }).join('');
 
     summaryEl.innerHTML = rowsHtml;
     dropdownSummaryEl.innerHTML = rowsHtml;
@@ -935,6 +951,7 @@ async function submitRequestChip() {
 }
 
 renderProducts();
+updateOrder();
 </script>
 
 <div style="background-color: #f8d7da; color: #721c24; padding: 15px; text-align: center; font-weight: bold; border: 1px solid #f5c6cb; margin-top: 20px;">
