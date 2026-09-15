@@ -355,6 +355,81 @@ max-height: 80px;
         /* General UI */
         .btn { display: inline-block; padding: 1.2rem 2.5rem; border-radius: 50px; font-weight: 800; text-decoration: none; transition: 0.3s; cursor: pointer; border: none; }
         .btn-primary { background: var(--primary); color: white; }
+
+        /* Added-to-cart toast (fixed to viewport, visible regardless of scroll) */
+        .cart-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150%);
+            background: var(--success);
+            color: white;
+            padding: 14px 26px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10050;
+            transition: transform 0.3s ease;
+            max-width: 90vw;
+            text-align: center;
+        }
+        .cart-toast.show { transform: translateX(-50%) translateY(0); }
+
+        .btn-outline-cart {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-outline-cart:hover { background: var(--primary); color: white; }
+
+        /* Nav cart icon + dropdown (matches other.html) */
+        .nav-right { display: flex; align-items: center; gap: 1.25rem; }
+        @media (max-width: 968px) { .nav-right { margin-right: 60px; } }
+
+        .cart-wrapper { position: relative; display: flex; align-items: center; }
+        .cart-icon-btn {
+            background: none; border: none; cursor: pointer;
+            position: relative; padding: 8px; display: flex; align-items: center;
+            color: var(--dark);
+        }
+        .cart-icon-btn:hover { color: var(--primary); }
+        .cart-icon-btn svg { width: 24px; height: 24px; }
+
+        .cart-badge {
+            position: absolute; top: 2px; right: 2px;
+            background: var(--primary); color: white;
+            font-size: 11px; font-weight: 800; line-height: 1;
+            border-radius: 999px; min-width: 18px; height: 18px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px;
+        }
+        .cart-badge.hidden { display: none; }
+
+        .cart-dropdown {
+            position: absolute; top: calc(100% + 14px); right: -10px;
+            width: 300px; max-width: 88vw;
+            background: white; border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+            padding: 1.25rem; text-align: left;
+            display: none; z-index: 10001;
+        }
+        .cart-dropdown.active { display: block; }
+        .cart-dropdown::before {
+            content: ''; position: absolute; top: -6px; right: 20px;
+            width: 12px; height: 12px; background: white;
+            transform: rotate(45deg);
+            box-shadow: -3px -3px 6px rgba(0,0,0,0.03);
+        }
+        .cart-dropdown-summary { font-size: 0.9rem; color: #444; margin-bottom: 0.75rem; max-height: 220px; overflow-y: auto; }
+        .cart-dropdown-summary div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; }
+        .cart-dropdown-summary .empty { color: #999; font-style: italic; text-align: center; padding: 12px 0; }
+        .cart-dropdown-total {
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 900; font-size: 1.1rem; color: var(--primary);
+            padding-top: 0.75rem; border-top: 1px solid #eee; margin-bottom: 1rem;
+        }
+        .cart-dropdown .btn-primary { width: 100%; padding: 0.9rem; font-size: 0.9rem; }
     </style>
 </head>
 
@@ -363,6 +438,8 @@ max-height: 80px;
 <body>
 
 
+<div class="cart-toast" id="cartToast"></div>
+
 <div style="height: 45px;"></div>
 
     <nav>
@@ -370,20 +447,44 @@ max-height: 80px;
             
 <a href="index.html" class="logo"><img src="logo.png" alt="AMANA Therapeutics Logo"></a>
 
-<button type="button" class="mobile-menu-btn" onclick="toggleMenu(event)" aria-label="Toggle Navigation">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
-
-      <ul class="nav-links" id="navLinks">
+<div class="nav-right">
+    <ul class="nav-links" id="navLinks">
         <li><a href="index.html">Home</a></li>
         <li><a href="product.html">Retatrutide</a></li>
         <li><a href="other.html">Other Peptides</a></li>
         <li><a href="faq.html">FAQs</a></li>
         <li><a href="contact.html">Contact Us</a></li>
         <li><a href="about.html">About</a></li>
-      </ul>
+    </ul>
+
+    <div class="cart-wrapper">
+        <button type="button" class="cart-icon-btn" id="cartIconBtn" onclick="toggleCartDropdown(event)" aria-label="View cart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                <path d="M3 6h18"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <span class="cart-badge hidden" id="cartBadge">0</span>
+        </button>
+
+        <div class="cart-dropdown" id="cartDropdown">
+            <div class="cart-dropdown-summary" id="cartDropdownSummary">
+                <div class="empty">No items selected yet</div>
+            </div>
+            <div class="cart-dropdown-total">
+                <span>Total</span>
+                <span id="cartDropdownTotal">$0.00 AUD</span>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="goToCheckout()">Secure Checkout</button>
+        </div>
+    </div>
+</div>
+
+<button type="button" class="mobile-menu-btn" onclick="toggleMenu(event)" aria-label="Toggle Navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
         </div>
     </nav>
 
@@ -492,6 +593,13 @@ max-height: 80px;
 
 
 <div class="payment-outer-container">
+<button
+    id="add-to-cart-button"
+    type="button"
+    class="btn btn-outline-cart custom-square-width"
+    onclick="addCurrentToCart();">
+    Add to Cart
+</button>
 <button 
     id="checkout-button" 
     type="button"
@@ -508,6 +616,8 @@ max-height: 80px;
       justify-content: center;
       width: 100%;
       padding: 10px 0;
+      gap: 12px;
+      flex-wrap: wrap;
   }
 
   /* 2. Your existing site styles */
@@ -731,6 +841,11 @@ document.addEventListener('click', function(e) {
         !btn.contains(e.target)) {
         toggleMenu();
     }
+
+    const cartWrapper = document.querySelector('.cart-wrapper');
+    if (cartWrapper && !cartWrapper.contains(e.target)) {
+        closeCartDropdown();
+    }
 });
 
 document.querySelectorAll('.nav-links a').forEach(link => {
@@ -763,12 +878,20 @@ function updateSelection() {
     if (image) { document.getElementById("main-view").src = image; }
 }
 
-function goToCheckout() {
+let cartToastTimeout;
+function showCartToast(message) {
+    const toast = document.getElementById('cartToast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(cartToastTimeout);
+    cartToastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function getCurrentSelection() {
     const select = document.getElementById("productSelect");
     const option = select.options[select.selectedIndex];
     const quantity = parseInt(document.getElementById("quantity").value) || 1;
-    
-    // Calculate the same total for the checkout page
+
     const price = parseFloat(option.dataset.price);
     let total = price * quantity;
     if (option.value === "vial") {
@@ -776,15 +899,83 @@ function goToCheckout() {
         else if (quantity === 3) total = 249.95;
         else if (quantity === 4) total = 319.95;
         else if (quantity === 5) total = 349.95;
-        else if (quantity > 5) total = 349.95 + (quantity - 5) * 69.99
+        else if (quantity > 5) total = 349.95 + (quantity - 5) * 69.99;
     }
 
-    // SAVE TO MEMORY
-    localStorage.setItem("product", `${quantity}x ${option.text.trim()}`);
-    localStorage.setItem("price", total.toFixed(2));
+    return {
+        summary: `${quantity}x ${option.text.trim()}`,
+        total: total
+    };
+}
+
+// Adds the current selection to the cart and shows a confirmation toast,
+// without navigating away — so items can also be added from other.html
+// before heading to checkout.
+function addCurrentToCart() {
+    const { summary, total } = getCurrentSelection();
+    addToCart(summary, total);
+    showCartToast(`✓ Added ${summary} to cart`);
+    updateCartUI();
+    openCartDropdown();
+}
+
+function openCartDropdown() {
+    document.getElementById('cartDropdown').classList.add('active');
+}
+
+function closeCartDropdown() {
+    document.getElementById('cartDropdown').classList.remove('active');
+}
+
+function toggleCartDropdown(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    document.getElementById('cartDropdown').classList.toggle('active');
+}
+
+// Reads whatever is currently in localStorage (which may include items
+// added here AND on other.html) and reflects it in the nav cart icon.
+function updateCartUI() {
+    const product = localStorage.getItem('product');
+    const price = parseFloat(localStorage.getItem('price')) || 0;
+    const summaryEl = document.getElementById('cartDropdownSummary');
+    const totalEl = document.getElementById('cartDropdownTotal');
+    const badge = document.getElementById('cartBadge');
+
+    if (!product) {
+        summaryEl.innerHTML = '<div class="empty">No items selected yet</div>';
+        totalEl.textContent = '$0.00 AUD';
+        badge.textContent = '0';
+        badge.classList.add('hidden');
+        return;
+    }
+
+    const items = product.split(', ');
+    summaryEl.innerHTML = items.map(item => `<div><span>${item}</span></div>`).join('');
+    totalEl.textContent = `$${price.toFixed(2)} AUD`;
+    badge.textContent = items.length;
+    badge.classList.remove('hidden');
+}
+
+function goToCheckout() {
+    const { summary, total } = getCurrentSelection();
+    addToCart(summary, total);
 
     // MOVE TO CHECKOUT
     window.location.href = "checkout.html";
+}
+
+// Adds an item to whatever is already sitting in localStorage instead of
+// overwriting it, so items picked here AND on other.html both show up
+// together at checkout instead of one wiping out the other.
+function addToCart(productSummary, amount) {
+    const existingProduct = localStorage.getItem("product");
+    const existingPrice = parseFloat(localStorage.getItem("price")) || 0;
+
+    const combinedProduct = existingProduct ? `${existingProduct}, ${productSummary}` : productSummary;
+    const combinedPrice = existingPrice + amount;
+
+    localStorage.setItem("product", combinedProduct);
+    localStorage.setItem("price", combinedPrice.toFixed(2));
 }
 
 // Gallery & UI Logic
@@ -799,7 +990,10 @@ function toggleFaq(btn) {
     panel.style.maxHeight = panel.style.maxHeight ? null : panel.scrollHeight + "px";
 }
 
-window.onload = updateSelection;
+window.onload = function() {
+    updateSelection();
+    updateCartUI();
+};
 </script>
 <div style="background-color: #f8d7da; color: #721c24; padding: 15px; text-align: center; font-weight: bold; border: 1px solid #f5c6cb; margin-top: 20px;">
     IMPORTANT: All products on this site are for laboratory research use only. NOT FOR HUMAN CONSUMPTION.
