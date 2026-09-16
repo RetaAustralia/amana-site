@@ -540,7 +540,7 @@ max-height: 80px;
 <input type="number" id="quantity" value="1" min="1" onchange="updateSelection()" style="width: 80px; padding: 12px; border: 2px solid #ddd; border-radius: 10px;">
             </div>
 
-            <div class="option-box">
+            <div class="option-box" style="display: none;">
                 <label style="font-weight: bold; display: block; margin-bottom: 8px;">Version:</label>
                 <select id="productSelect" onchange="updateSelection()"
                         style="padding: 12px; border-radius: 10px; border: 2px solid #ddd; min-width: 180px;">
@@ -553,7 +553,7 @@ max-height: 80px;
                   
                         selected
                     >
-                        10mg Vial
+                        Retatrutide 10mg
                     </option>
 
 
@@ -889,6 +889,30 @@ function showCartToast(message) {
     cartToastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
+// ---- Shared cross-page cart storage (structured, kept in sync with the
+// legacy 'product'/'price' string keys that checkout.html reads) ----
+function readCartItems() {
+    try {
+        return JSON.parse(localStorage.getItem('cartItems')) || [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function writeCartItems(items) {
+    localStorage.setItem('cartItems', JSON.stringify(items));
+    localStorage.setItem('product', items.map(i => i.label).join(', '));
+    localStorage.setItem('price', items.reduce((sum, i) => sum + i.price, 0).toFixed(2));
+}
+
+// Each "Add to Cart" click here adds a new line (no stable id to update,
+// since quantity/version can differ between clicks).
+function addCartLine(label, price) {
+    const items = readCartItems();
+    items.push({ id: `product-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, label, price });
+    writeCartItems(items);
+}
+
 function getCurrentSelection() {
     const select = document.getElementById("productSelect");
     const option = select.options[select.selectedIndex];
@@ -915,7 +939,7 @@ function getCurrentSelection() {
 // before heading to checkout.
 function addCurrentToCart() {
     const { summary, total } = getCurrentSelection();
-    addToCart(summary, total);
+    addCartLine(summary, total);
     showCartToast(`✓ Added ${summary} to cart`);
     updateCartUI();
     openCartDropdown();
@@ -934,16 +958,15 @@ function toggleCartDropdown(e) {
     document.getElementById('cartDropdown').classList.toggle('active');
 }
 
-// Reads whatever is currently in localStorage (which may include items
-// added here AND on other.html) and reflects it in the nav cart icon.
+// Reads whatever is currently in the shared cart (which may include
+// items added here AND on other.html) and reflects it in the nav icon.
 function updateCartUI() {
-    const product = localStorage.getItem('product');
-    const price = parseFloat(localStorage.getItem('price')) || 0;
+    const items = readCartItems();
     const summaryEl = document.getElementById('cartDropdownSummary');
     const totalEl = document.getElementById('cartDropdownTotal');
     const badge = document.getElementById('cartBadge');
 
-    if (!product) {
+    if (items.length === 0) {
         summaryEl.innerHTML = '<div class="empty">No items selected yet</div>';
         totalEl.textContent = '$0.00 AUD';
         badge.textContent = '0';
@@ -951,33 +974,19 @@ function updateCartUI() {
         return;
     }
 
-    const items = product.split(', ');
-    summaryEl.innerHTML = items.map(item => `<div><span>${item}</span></div>`).join('');
-    totalEl.textContent = `$${price.toFixed(2)} AUD`;
+    const total = items.reduce((sum, i) => sum + i.price, 0);
+    summaryEl.innerHTML = items.map(i => `<div><span>${i.label}</span><span>$${i.price.toFixed(2)}</span></div>`).join('');
+    totalEl.textContent = `$${total.toFixed(2)} AUD`;
     badge.textContent = items.length;
     badge.classList.remove('hidden');
 }
 
 function goToCheckout() {
     const { summary, total } = getCurrentSelection();
-    addToCart(summary, total);
+    addCartLine(summary, total);
 
     // MOVE TO CHECKOUT
     window.location.href = "checkout.html";
-}
-
-// Adds an item to whatever is already sitting in localStorage instead of
-// overwriting it, so items picked here AND on other.html both show up
-// together at checkout instead of one wiping out the other.
-function addToCart(productSummary, amount) {
-    const existingProduct = localStorage.getItem("product");
-    const existingPrice = parseFloat(localStorage.getItem("price")) || 0;
-
-    const combinedProduct = existingProduct ? `${existingProduct}, ${productSummary}` : productSummary;
-    const combinedPrice = existingPrice + amount;
-
-    localStorage.setItem("product", combinedProduct);
-    localStorage.setItem("price", combinedPrice.toFixed(2));
 }
 
 // Gallery & UI Logic
