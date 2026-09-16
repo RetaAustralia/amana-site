@@ -612,6 +612,36 @@ const NOTIFY_FORM_ENDPOINT = "https://formspree.io/f/mojjdqbe";
 // cart is a map of productId -> quantity, only for checked items
 const cart = {};
 
+// ---- Shared cross-page cart storage (structured, kept in sync with the
+// legacy 'product'/'price' string keys that checkout.html reads) ----
+function readCartItems() {
+    try {
+        return JSON.parse(localStorage.getItem('cartItems')) || [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function writeCartItems(items) {
+    localStorage.setItem('cartItems', JSON.stringify(items));
+    localStorage.setItem('product', items.map(i => i.label).join(', '));
+    localStorage.setItem('price', items.reduce((sum, i) => sum + i.price, 0).toFixed(2));
+}
+
+// Adds or updates a single line item by a stable id (e.g. one per product
+// checkbox on this page), so checking/unchecking or changing quantity
+// updates that one line instead of creating duplicates.
+function upsertCartItem(id, label, price) {
+    const items = readCartItems();
+    const idx = items.findIndex(i => i.id === id);
+    if (idx >= 0) { items[idx] = { id, label, price }; } else { items.push({ id, label, price }); }
+    writeCartItems(items);
+}
+
+function removeCartItem(id) {
+    writeCartItems(readCartItems().filter(i => i.id !== id));
+}
+
 function renderProducts() {
     const grid = document.getElementById('shopGrid');
     grid.innerHTML = PRODUCTS.map(p => {
@@ -719,15 +749,18 @@ function toggleProduct(id) {
     const card = document.getElementById(`card-${id}`);
 
     if (checkbox.checked) {
-        cart[id] = parseInt(qtySelect.value) || 1;
+        const qty = parseInt(qtySelect.value) || 1;
+        cart[id] = qty;
         qtySelect.disabled = false;
         card.classList.add('selected');
         openCartDropdown();
         showCartToast(`✓ Added ${product.name} to cart`);
+        upsertCartItem(`other-${id}`, `${qty}x ${product.name}`, product.price * qty);
     } else {
         delete cart[id];
         qtySelect.disabled = true;
         card.classList.remove('selected');
+        removeCartItem(`other-${id}`);
     }
 
     document.getElementById('error-message').textContent = '';
@@ -742,41 +775,16 @@ function setQty(id, value) {
     if (qty > max) qty = max;
     if (qty < 1) qty = 1;
     cart[id] = qty;
+    upsertCartItem(`other-${id}`, `${qty}x ${product.name}`, product.price * qty);
     updateOrder();
-}
-
-// Reads whatever's already been added to the cart from another page
-// (e.g. product.html), so it isn't invisible until you check out here too.
-function getExistingCart() {
-    const productStr = localStorage.getItem('product');
-    return {
-        items: productStr ? productStr.split(', ') : [],
-        price: parseFloat(localStorage.getItem('price')) || 0
-    };
 }
 
 function updateOrder() {
     const summaryEl = document.getElementById('orderSummary');
     const dropdownSummaryEl = document.getElementById('cartDropdownSummary');
-    const ids = Object.keys(cart);
-    const existing = getExistingCart();
+    const items = readCartItems();
 
-    let total = existing.price;
-    let itemCount = existing.items.length;
-
-    const liveRowsHtml = ids.map(id => {
-        const product = PRODUCTS.find(p => p.id === id);
-        const qty = cart[id];
-        const lineTotal = product.price * qty;
-        total += lineTotal;
-        itemCount += qty;
-        return `<div><span>${qty}x ${product.name}</span><span>$${lineTotal.toFixed(2)}</span></div>`;
-    }).join('');
-
-    const existingRowsHtml = existing.items.map(item => `<div><span>${item}</span></div>`).join('');
-    const rowsHtml = existingRowsHtml + liveRowsHtml;
-
-    if (!rowsHtml) {
+    if (items.length === 0) {
         const emptyHtml = '<div class="empty">No items selected yet</div>';
         summaryEl.innerHTML = emptyHtml;
         dropdownSummaryEl.innerHTML = emptyHtml;
@@ -786,11 +794,14 @@ function updateOrder() {
         return;
     }
 
+    const total = items.reduce((sum, i) => sum + i.price, 0);
+    const rowsHtml = items.map(i => `<div><span>${i.label}</span><span>$${i.price.toFixed(2)}</span></div>`).join('');
+
     summaryEl.innerHTML = rowsHtml;
     dropdownSummaryEl.innerHTML = rowsHtml;
     document.getElementById('orderTotal').textContent = `$${total.toFixed(2)} AUD`;
     document.getElementById('cartDropdownTotal').textContent = `$${total.toFixed(2)} AUD`;
-    setCartBadge(itemCount);
+    setCartBadge(items.length);
 }
 
 function setCartBadge(count) {
@@ -813,36 +824,11 @@ function toggleCartDropdown(e) {
 }
 
 function goToCheckout() {
-    const ids = Object.keys(cart);
-    if (ids.length === 0) {
+    if (readCartItems().length === 0) {
         document.getElementById('error-message').textContent = 'Please select at least one product first.';
         return;
     }
-
-    let newTotal = 0;
-    const productSummary = ids.map(id => {
-        const product = PRODUCTS.find(p => p.id === id);
-        const qty = cart[id];
-        newTotal += product.price * qty;
-        return `${qty}x ${product.name}`;
-    }).join(', ');
-
-    addToCart(productSummary, newTotal);
     window.location.href = 'checkout.html';
-}
-
-// Adds an item to whatever is already sitting in localStorage instead of
-// overwriting it, so items picked on this page AND on product.html both
-// show up together at checkout instead of one wiping out the other.
-function addToCart(productSummary, amount) {
-    const existingProduct = localStorage.getItem('product');
-    const existingPrice = parseFloat(localStorage.getItem('price')) || 0;
-
-    const combinedProduct = existingProduct ? `${existingProduct}, ${productSummary}` : productSummary;
-    const combinedPrice = existingPrice + amount;
-
-    localStorage.setItem('product', combinedProduct);
-    localStorage.setItem('price', combinedPrice.toFixed(2));
 }
 
 // Mobile menu (same behavior as other pages)
@@ -951,7 +937,33 @@ async function submitRequestChip() {
     document.getElementById('requestChipConfirm').classList.add('show');
 }
 
+// Restores checkbox/quantity state for items that were added on this
+// page in a previous visit (ids prefixed "other-"), so the UI reflects
+// what's actually already in the cart instead of looking empty.
+function restoreCartState() {
+    const items = readCartItems();
+    items.forEach(item => {
+        if (!item.id.startsWith('other-')) return;
+        const productId = item.id.replace('other-', '');
+        const product = PRODUCTS.find(p => p.id === productId);
+        if (!product) return;
+
+        const checkbox = document.getElementById(`check-${productId}`);
+        const qtySelect = document.getElementById(`qty-${productId}`);
+        const card = document.getElementById(`card-${productId}`);
+        if (!checkbox || !qtySelect || !card) return;
+
+        const qty = Math.max(1, Math.round(item.price / product.price)) || 1;
+        checkbox.checked = true;
+        qtySelect.disabled = false;
+        qtySelect.value = String(Math.min(qty, product.maxQty || 5));
+        card.classList.add('selected');
+        cart[productId] = parseInt(qtySelect.value) || 1;
+    });
+}
+
 renderProducts();
+restoreCartState();
 updateOrder();
 </script>
 
