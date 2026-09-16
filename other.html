@@ -494,10 +494,11 @@
 
 <div class="shop-header">
     <h1>Shop Other Peptides</h1>
-    <p>We periodically stock other peptides per customer requests. If you'd like to request a re-stock or other peptide, fill in our contact form to let us know and we will get you sorted ASAP.</p>
-    <a href="tel:0400000000" class="header-phone">
-        <div class="phone-line">📱 0400 000 000</div>
-        <div class="phone-sub">Tap to call or text on mobile</div>
+    <p>We periodically stock other peptides per customer requests. If you'd like to request a re-stock or other peptide let us know and we will get you sorted ASAP.</p>
+    <h2>Want something else? We'll get you sorted.</h2>
+    <a href="sms:0477932965" class="header-phone">
+        <div class="phone-line">📱 0477 932 965</div>
+        <div class="phone-sub">Tap to text us</div>
     </a>
 </div>
 
@@ -515,13 +516,13 @@
 </div>
 
 <section class="request-section">
-    <h2>Looking For Something Specific?</h2>
+    <h2>Can't find what you're looking for?</h2>
     <p>Tap what you're after, or let us know something else — takes 5 seconds.</p>
 
     <div class="chip-row" id="requestChipRow">
-        <div class="chip" onclick="selectRequestChip(this, 'BPC-157')">BPC-157</div>
-        <div class="chip" onclick="selectRequestChip(this, 'TB-500')">TB-500</div>
-        <div class="chip" onclick="selectRequestChip(this, 'Tirzepatide')">Tirzepatide</div>
+        <div class="chip" onclick="selectRequestChip(this, 'CJC-1295')">CJC-1295</div>
+        <div class="chip" onclick="selectRequestChip(this, 'Testosterone')">Testsosteron</div>
+        <div class="chip" onclick="selectRequestChip(this, 'KPV')">KPV</div>
         <div class="chip" onclick="selectRequestChip(this, 'Something else')">Something else</div>
     </div>
 
@@ -605,7 +606,7 @@ function showCartToast(message) {
    Paste it below (keep the quotes). Submissions will land in
    the inbox/dashboard tied to that Formspree form.
    ========================================================= */
-const NOTIFY_FORM_ENDPOINT = "PASTE_YOUR_FORMSPREE_URL_HERE";
+const NOTIFY_FORM_ENDPOINT = "https://formspree.io/f/mojjdqbe";
 /* ========================================================= */
 
 // cart is a map of productId -> quantity, only for checked items
