@@ -288,6 +288,16 @@ function showPayment() {
 document.getElementById("checkout-form").addEventListener("submit", async function(e) {
     e.preventDefault();
 
+    // If payment details haven't actually been revealed yet (e.g. the
+    // customer pressed Enter while filling in shipping fields, rather
+    // than clicking "Continue to Payment"), show payment info instead
+    // of submitting an order they haven't paid for.
+    const paymentSection = document.getElementById("payment-section");
+    if (paymentSection.style.display !== "block") {
+        showPayment();
+        return;
+    }
+
     const form = e.target;
     const formData = new FormData(form);
     const errorEl = document.getElementById("checkout-error");
