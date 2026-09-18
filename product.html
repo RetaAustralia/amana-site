@@ -424,8 +424,15 @@ max-height: 80px;
             box-shadow: -3px -3px 6px rgba(0,0,0,0.03);
         }
         .cart-dropdown-summary { font-size: 0.9rem; color: #444; margin-bottom: 0.75rem; max-height: 220px; overflow-y: auto; }
-        .cart-dropdown-summary div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; }
+        .cart-dropdown-summary div { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; }
         .cart-dropdown-summary .empty { color: #999; font-style: italic; text-align: center; padding: 12px 0; }
+        .cart-line-actions { display: flex; align-items: center; gap: 8px; }
+        .cart-remove-btn {
+            background: none; border: none; cursor: pointer;
+            color: #aaa; font-size: 1rem; line-height: 1;
+            padding: 2px 4px; border-radius: 4px;
+        }
+        .cart-remove-btn:hover { color: #ef4444; background: rgba(239,68,68,0.08); }
         .cart-dropdown-total {
             display: flex; justify-content: space-between; align-items: center;
             font-weight: 900; font-size: 1.1rem; color: var(--primary);
@@ -975,10 +982,25 @@ function updateCartUI() {
     }
 
     const total = items.reduce((sum, i) => sum + i.price, 0);
-    summaryEl.innerHTML = items.map(i => `<div><span>${i.label}</span><span>$${i.price.toFixed(2)}</span></div>`).join('');
+    summaryEl.innerHTML = items.map(i => `
+        <div>
+            <span>${i.label}</span>
+            <span class="cart-line-actions">
+                <span>$${i.price.toFixed(2)}</span>
+                <button type="button" class="cart-remove-btn" onclick="removeCartLine(event, '${i.id}')" aria-label="Remove ${i.label}">✕</button>
+            </span>
+        </div>`).join('');
     totalEl.textContent = `$${total.toFixed(2)} AUD`;
     badge.textContent = items.length;
     badge.classList.remove('hidden');
+}
+
+// Removes a single line from the cart (whether it was added here or on
+// other.html) and refreshes the nav cart display.
+function removeCartLine(e, id) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    writeCartItems(readCartItems().filter(i => i.id !== id));
+    updateCartUI();
 }
 
 function goToCheckout() {
