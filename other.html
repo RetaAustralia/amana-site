@@ -146,8 +146,15 @@
             box-shadow: -3px -3px 6px rgba(0,0,0,0.03);
         }
         .cart-dropdown-summary { font-size: 0.9rem; color: #444; margin-bottom: 0.75rem; max-height: 220px; overflow-y: auto; }
-        .cart-dropdown-summary div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; }
+        .cart-dropdown-summary div { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; }
         .cart-dropdown-summary .empty { color: #999; font-style: italic; text-align: center; padding: 12px 0; }
+        .cart-line-actions { display: flex; align-items: center; gap: 8px; }
+        .cart-remove-btn {
+            background: none; border: none; cursor: pointer;
+            color: #aaa; font-size: 1rem; line-height: 1;
+            padding: 2px 4px; border-radius: 4px;
+        }
+        .cart-remove-btn:hover { color: #ef4444; background: rgba(239,68,68,0.08); }
         .cart-dropdown-total {
             display: flex; justify-content: space-between; align-items: center;
             font-weight: 900; font-size: 1.1rem; color: var(--primary);
@@ -301,7 +308,7 @@
             text-align: center;
         }
         .order-summary { text-align: left; font-size: 0.9rem; color: #444; margin-bottom: 1rem; }
-        .order-summary div { display: flex; justify-content: space-between; padding: 4px 0; }
+        .order-summary div { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 0; }
         .order-summary .empty { color: #999; text-align: center; font-style: italic; }
 
         .order-total { font-size: 2rem; font-weight: 900; color: var(--primary); margin: 1rem 0 1.5rem; }
@@ -795,13 +802,41 @@ function updateOrder() {
     }
 
     const total = items.reduce((sum, i) => sum + i.price, 0);
-    const rowsHtml = items.map(i => `<div><span>${i.label}</span><span>$${i.price.toFixed(2)}</span></div>`).join('');
+    const rowsHtml = items.map(i => `
+        <div>
+            <span>${i.label}</span>
+            <span class="cart-line-actions">
+                <span>$${i.price.toFixed(2)}</span>
+                <button type="button" class="cart-remove-btn" onclick="removeCartLine(event, '${i.id}')" aria-label="Remove ${i.label}">✕</button>
+            </span>
+        </div>`).join('');
 
     summaryEl.innerHTML = rowsHtml;
     dropdownSummaryEl.innerHTML = rowsHtml;
     document.getElementById('orderTotal').textContent = `$${total.toFixed(2)} AUD`;
     document.getElementById('cartDropdownTotal').textContent = `$${total.toFixed(2)} AUD`;
     setCartBadge(items.length);
+}
+
+// Removes a single line from the cart. If it came from a checkbox on
+// this page ("other-" prefixed), also resets that checkbox/qty/card
+// back to its unselected state so the UI stays consistent.
+function removeCartLine(e, id) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    writeCartItems(readCartItems().filter(i => i.id !== id));
+
+    if (id.startsWith('other-')) {
+        const productId = id.replace('other-', '');
+        delete cart[productId];
+        const checkbox = document.getElementById(`check-${productId}`);
+        const qtySelect = document.getElementById(`qty-${productId}`);
+        const card = document.getElementById(`card-${productId}`);
+        if (checkbox) checkbox.checked = false;
+        if (qtySelect) { qtySelect.disabled = true; qtySelect.value = "1"; }
+        if (card) card.classList.remove('selected');
+    }
+
+    updateOrder();
 }
 
 function setCartBadge(count) {
