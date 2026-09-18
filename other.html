@@ -237,6 +237,13 @@
         .stock-badge.out .label { color: #b91c1c; }
 
         .product-card h3 { font-size: 1.05rem; margin-bottom: 0.6rem; }
+        .use-caption {
+            font-size: 0.82rem;
+            color: #777;
+            font-style: italic;
+            margin: -0.3rem 0 0.9rem;
+            line-height: 1.4;
+        }
         .product-card .price { font-size: 1.4rem; font-weight: 900; color: var(--primary); margin-bottom: 1rem; }
 
         .card-controls { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
@@ -581,17 +588,19 @@
      "low" -> yellow "Low Stock"
      "out" -> red "Out of Stock" (card is disabled, can't be selected)
    maxQty -> the highest quantity a customer can select for that item
+   useCase -> one short sentence shown under the product name describing
+              what it's commonly used for (Option C labeling)
    ========================================================= */
 const PRODUCTS = [
-    { id: "p1", name: "GHK-CU 50mg",         price: 49.95, stock: "in",  maxQty: 5 },
-    { id: "p2", name: "BPC-157 10mg",        price: 59.95, stock: "in",  maxQty: 5 },
-    { id: "p3", name: "TB-500 10mg",         price: 79.95, stock: "in",  maxQty: 5 },
-    { id: "p4", name: "Semax 10mg",          price: 49.95, stock: "in",  maxQty: 5 },
-    { id: "p5", name: "Selank 10mg",         price: 49.95, stock: "low", maxQty: 4 },
-    { id: "p6", name: "NAD+ 500mg",          price: 69.95, stock: "low", maxQty: 4 },
-    { id: "p7", name: "Tesamorelin 10mg",    price: 79.95, stock: "in",  maxQty: 5 },
-    { id: "p8", name: "KPV 10mg",            price: 39.95, stock: "out", maxQty: 1 },
-    { id: "p9", name: "Glutathione 600mg",   price: 49.95, stock: "low", maxQty: 4 }
+    { id: "p1", name: "GHK-CU 50mg",         price: 49.95, stock: "in",  maxQty: 5, useCase: "A popular peptide for skin repair and wound healing" },
+    { id: "p2", name: "BPC-157 10mg",        price: 59.95, stock: "in",  maxQty: 5, useCase: "Widely used for tissue repair and gut healing" },
+    { id: "p3", name: "TB-500 10mg",         price: 79.95, stock: "in",  maxQty: 5, useCase: "Often used to support recovery from injury" },
+    { id: "p4", name: "Semax 10mg",          price: 49.95, stock: "in",  maxQty: 5, useCase: "A nootropic commonly used for focus and cognitive support" },
+    { id: "p5", name: "Selank 10mg",         price: 49.95, stock: "low", maxQty: 4, useCase: "Often used to support mood and stress response" },
+    { id: "p6", name: "NAD+ 500mg",          price: 69.95, stock: "low", maxQty: 4, useCase: "Popular for cellular energy and anti-aging support" },
+    { id: "p7", name: "Tesamorelin 10mg",    price: 79.95, stock: "in",  maxQty: 5, useCase: "Often used for growth hormone and body composition support" },
+    { id: "p8", name: "KPV 10mg",            price: 39.95, stock: "out", maxQty: 1, useCase: "Commonly used for gut and inflammation support" },
+    { id: "p9", name: "Glutathione 600mg",   price: 49.95, stock: "low", maxQty: 4, useCase: "A popular antioxidant for detox and skin support" }
 ];
 /* ========================================================= */
 
@@ -691,6 +700,7 @@ function renderProducts() {
                 <span class="label">${STOCK_LABELS[p.stock]}</span>
             </div>
             <h3>${p.name}</h3>
+            <div class="use-caption">${p.useCase}</div>
             <div class="price">$${p.price.toFixed(2)} AUD</div>
             ${controlsHtml}
         </div>`;
