@@ -393,6 +393,13 @@
             font-size: 0.9rem;
         }
         .chip-contact-form input:focus { outline: none; border-color: var(--primary); }
+        .chip-contact-form input.hidden { display: none; }
+        .chip-form-note {
+            flex-basis: 100%;
+            font-size: 0.85rem;
+            color: #555;
+            margin: 0 0 0.25rem !important;
+        }
         .chip-contact-form button {
             padding: 0.8rem 1.5rem;
             border: none;
@@ -535,16 +542,18 @@
 
     <div class="chip-row" id="requestChipRow">
         <div class="chip" onclick="selectRequestChip(this, 'CJC-1295')">CJC-1295</div>
-        <div class="chip" onclick="selectRequestChip(this, 'Testosterone')">Testosterone</div>
+        <div class="chip" onclick="selectRequestChip(this, 'Tesamorelin')">Tesamorelin</div>
         <div class="chip" onclick="selectRequestChip(this, 'KPV')">KPV</div>
         <div class="chip" onclick="selectRequestChip(this, 'Something else')">Something else</div>
     </div>
 
     <div class="chip-contact-form" id="requestChipForm">
-        <input type="text" id="requestChipInput" placeholder="Your email or phone number">
+        <p class="chip-form-note">Leave your email or phone so we can get back to you about it.</p>
+        <input type="text" id="requestProductInput" class="hidden" placeholder="Product name">
+        <input type="text" id="requestChipInput" placeholder="Your email or phone number (required)">
         <button type="button" onclick="submitRequestChip()">Send</button>
     </div>
-    <div class="chip-request-error" id="requestChipError">Please enter an email or phone number.</div>
+    <div class="chip-request-error" id="requestChipError"></div>
     <div class="chip-request-confirm" id="requestChipConfirm">✓ Thanks — we'll be in touch.</div>
 </section>
 
@@ -937,28 +946,63 @@ function selectRequestChip(el, label) {
     selectedRequestChip = label;
 
     const form = document.getElementById('requestChipForm');
-    const input = document.getElementById('requestChipInput');
+    const productInput = document.getElementById('requestProductInput');
     form.classList.add('open');
     document.getElementById('requestChipError').classList.remove('show');
     document.getElementById('requestChipConfirm').classList.remove('show');
 
-    input.placeholder = label === 'Something else'
-        ? "Product name + your email or phone"
-        : "Your email or phone number";
+    // Only ask for a product name when "Something else" is picked
+    productInput.classList.toggle('hidden', label !== 'Something else');
+    productInput.value = '';
+    productInput.style.borderColor = '#ddd';
+}
+
+// Accepts a normal email, or a phone number with 8-15 digits
+// (spaces, brackets, + and dashes are allowed)
+function isValidContact(value) {
+    const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const digits = value.replace(/[\s()+-]/g, '');
+    return email.test(value) || /^\d{8,15}$/.test(digits);
+}
+
+function showRequestError(msg, inputEl) {
+    const errorEl = document.getElementById('requestChipError');
+    errorEl.textContent = msg;
+    errorEl.classList.add('show');
+    if (inputEl) inputEl.style.borderColor = '#ef4444';
 }
 
 async function submitRequestChip() {
+    const productInput = document.getElementById('requestProductInput');
     const input = document.getElementById('requestChipInput');
     const value = input.value.trim();
     const errorEl = document.getElementById('requestChipError');
 
-    if (!selectedRequestChip || !value) {
-        errorEl.classList.add('show');
-        input.style.borderColor = '#ef4444';
+    productInput.style.borderColor = '#ddd';
+    input.style.borderColor = '#ddd';
+    errorEl.classList.remove('show');
+
+    if (!selectedRequestChip) {
+        showRequestError('Please pick a product above first.');
         return;
     }
-    errorEl.classList.remove('show');
-    input.style.borderColor = '#ddd';
+
+    const product = selectedRequestChip === 'Something else'
+        ? productInput.value.trim()
+        : selectedRequestChip;
+
+    if (!product) {
+        showRequestError('Please enter the product name.', productInput);
+        return;
+    }
+    if (!value) {
+        showRequestError('Please enter your email or phone number so we can contact you.', input);
+        return;
+    }
+    if (!isValidContact(value)) {
+        showRequestError("That doesn't look like a valid email or phone number.", input);
+        return;
+    }
 
     // Sends to the same Formspree endpoint used for out-of-stock
     // notify-me requests above, so everything lands in one place.
@@ -968,16 +1012,16 @@ async function submitRequestChip() {
                 method: 'POST',
                 headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    requestType: selectedRequestChip,
+                    product: product,
                     contact: value,
-                    message: `Product request: ${selectedRequestChip}`
+                    message: `Product request: ${product}`
                 })
             });
         } catch (err) {
             console.error('Request failed to send:', err);
         }
     } else {
-        console.log('[DEMO] Chip request (no Formspree endpoint set yet):', selectedRequestChip, value);
+        console.log('[DEMO] Chip request (no Formspree endpoint set yet):', product, value);
     }
 
     document.getElementById('requestChipForm').classList.remove('open');
